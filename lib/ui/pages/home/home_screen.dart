@@ -23,7 +23,7 @@ class HomeState extends State<HomeScreen> {
               gradient: LinearGradient(
                 begin: Alignment(0.50, 0.18),
                 end: Alignment(0.50, 1.00),
-                colors: [const Color(0xFF00FFCC), const Color(0xFF00FFCC)],
+                colors: [const Color(0xFF264AFF), const Color(0xFF00FFCC)],
               ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.only(
@@ -37,16 +37,30 @@ class HomeState extends State<HomeScreen> {
             children: [
               SizedBox(height: 100),
               Container(
-                margin: EdgeInsets.only(
-                  left: 21
-                ),
+                margin: EdgeInsets.only(left: 21),
                 child: Row(
                   children: [
-                    Text("a"), 
-                    Text("b")
-                  ]
-                )
-            ),
+                    Text(
+                      "Halo,",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 32,
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                    Text(
+                      "Selamat Datang",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 32,
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
               Text("abb"),
             ],
           ),
