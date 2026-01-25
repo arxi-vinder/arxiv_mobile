@@ -18,13 +18,9 @@ class HomeState extends State<HomeScreen> {
         children: [
           Container(
             width: screenWidth,
-            height: 298,
+            height: 188,
             decoration: ShapeDecoration(
-              gradient: LinearGradient(
-                begin: Alignment(0.50, 0.18),
-                end: Alignment(0.50, 1.00),
-                colors: [const Color(0xFF264AFF), const Color(0xFF00FFCC)],
-              ),
+              color: const Color(0xFF3674B5),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.only(
                   bottomLeft: Radius.circular(32),
@@ -33,12 +29,13 @@ class HomeState extends State<HomeScreen> {
               ),
             ),
           ),
-          Column(
-            children: [
-              SizedBox(height: 100),
-              Container(
-                margin: EdgeInsets.only(left: 21),
-                child: Row(
+          Container(
+            margin: EdgeInsets.only(left: 17),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(height: 100),
+                Row(
                   children: [
                     Text(
                       "Halo,",
@@ -49,6 +46,7 @@ class HomeState extends State<HomeScreen> {
                         fontWeight: FontWeight.w400,
                       ),
                     ),
+                    SizedBox(width: 8),
                     Text(
                       "Selamat Datang",
                       style: TextStyle(
@@ -60,9 +58,18 @@ class HomeState extends State<HomeScreen> {
                     ),
                   ],
                 ),
-              ),
-              Text("abb"),
-            ],
+                SizedBox(height: 4),
+                Text(
+                  "Emmanuel Dito",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontFamily: 'Poppins',
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
