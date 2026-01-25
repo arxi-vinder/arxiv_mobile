@@ -30,11 +30,13 @@ class HomeState extends State<HomeScreen> {
             ),
           ),
           Container(
-            margin: EdgeInsets.only(left: 17),
+            height: 188,
+            padding: EdgeInsets.only(left: 17),
+            alignment: Alignment.centerLeft,
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SizedBox(height: 100),
                 Row(
                   children: [
                     Text(
