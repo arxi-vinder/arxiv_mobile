@@ -1,4 +1,4 @@
-import 'package:arxivinder_mobile/ui/pages/home/home_screen.dart';
+import 'package:arxivinder/ui/pages/home/home_screen.dart';
 import 'package:flutter/material.dart';
 
 void main() {
