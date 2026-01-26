@@ -17,8 +17,6 @@ class RootNavigationScreen extends StatefulWidget {
 class RootNavigationState extends State<RootNavigationScreen> {
   @override
   Widget build(BuildContext context) {
-    final BottomNavBarBloc navBarBloc = BottomNavBarBloc();
-
     return Scaffold(
       body: BlocBuilder<BottomNavBarBloc, int>(
         builder: (context, currIdx) {
@@ -37,12 +35,14 @@ class RootNavigationState extends State<RootNavigationScreen> {
           return BottomNavigationBar(
             currentIndex: index,
             onTap: (selectedIndex) {
-              navBarBloc.add(BottomNavigationEvent.values[index]);
+              context.read<BottomNavBarBloc>().add(
+                BottomNavigationEvent.values[selectedIndex],
+              );
             },
             items: const [
               BottomNavigationBarItem(
-                icon: Icon(Icons.home),
-                label: 'Home',
+                icon: Icon(Icons.home), 
+                label: 'Home'
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.search),
