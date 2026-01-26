@@ -1,5 +1,4 @@
 import 'package:arxivinder/blocs/bottom_nav_bar_bloc.dart';
-import 'package:arxivinder/ui/pages/home/home_screen.dart';
 import 'package:arxivinder/ui/pages/root/root_navigation_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
