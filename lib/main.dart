@@ -1,5 +1,7 @@
-import 'package:arxivinder_mobile/ui/pages/home/home_screen.dart';
+import 'package:arxivinder/blocs/bottom_nav_bar_bloc.dart';
+import 'package:arxivinder/ui/pages/root/root_navigation_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 void main() {
   runApp(const MainApp());
@@ -10,9 +12,12 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: Scaffold(body: Center(child: HomeScreen())),
+      home: BlocProvider(
+        create: (context) => BottomNavBarBloc(),
+        child: const RootNavigationScreen(),
+      ),
     );
   }
 }
