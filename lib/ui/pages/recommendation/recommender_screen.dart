@@ -1,4 +1,4 @@
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 
 class RecommenderScreen extends StatefulWidget {
   const RecommenderScreen({super.key});
@@ -12,6 +12,6 @@ class RecommenderScreen extends StatefulWidget {
 class RecommenderScreenState extends State<RecommenderScreen> {
   @override
   Widget build(BuildContext context) {
-    return Container();
+    return Scaffold(body: Text("a"));
   }
 }
