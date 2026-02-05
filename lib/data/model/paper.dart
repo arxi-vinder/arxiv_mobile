@@ -7,10 +7,12 @@ class Paper extends Equatable {
   final DateTime publishedDate;
   final String url;
   final String doi;
+  final String category;
   final DateTime createdAt;
 
   const Paper({
     required this.id,
+    required this.category,
     required this.title,
     required this.abstract,
     required this.publishedDate,
@@ -24,6 +26,7 @@ class Paper extends Equatable {
     id,
     title,
     abstract,
+    category,
     publishedDate,
     url,
     doi,
