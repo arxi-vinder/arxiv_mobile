@@ -1,3 +1,6 @@
+import 'package:arxivinder/data/model/paper.dart';
+import 'package:arxivinder/ui/utils/custom_list_tile.dart';
+import 'package:arxivinder/ui/utils/dummy.dart';
 import 'package:flutter/material.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -12,6 +15,7 @@ class HomeScreen extends StatefulWidget {
 class HomeState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
+    final List<Paper> papers = dummyPapers;
     final screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
       body: Stack(
@@ -68,6 +72,39 @@ class HomeState extends State<HomeScreen> {
                     fontSize: 20,
                     fontFamily: 'Poppins',
                     fontWeight: FontWeight.w400,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(height: 40),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 17, vertical: 200),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  "Rekomendasi Untuk Anda",
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'Poppins',
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Expanded(
+                  child: ListView.builder(
+                    itemBuilder: (ctx, index) {
+                      final item = papers[index];
+
+                      return CustomListTile(
+                        title: item.title,
+                        subTitle: item.abstract,
+                        description: item.doi,
+                      );
+                    },
+
+                    itemCount: papers.length,
                   ),
                 ),
               ],
