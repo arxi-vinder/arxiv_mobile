@@ -80,34 +80,43 @@ class HomeState extends State<HomeScreen> {
           SizedBox(height: 40),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 17, vertical: 200),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  "Rekomendasi Untuk Anda",
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    fontFamily: 'Poppins',
-                  ),
+            child: Container(
+              decoration: ShapeDecoration(
+                shape: RoundedRectangleBorder(
+                  side: BorderSide(width: 1, color: const Color(0xFFCAB6B6)),
+                  borderRadius: BorderRadius.circular(8),
                 ),
-                const SizedBox(height: 16),
-                Expanded(
-                  child: ListView.builder(
-                    itemBuilder: (ctx, index) {
-                      final item = papers[index];
-
-                      return CustomListTile(
-                        title: item.title,
-                        subTitle: item.abstract,
-                        description: item.doi,
-                      );
-                    },
-
-                    itemCount: papers.length,
+              ),
+              margin: EdgeInsets.only(left: 2),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Rekomendasi Untuk Anda",
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Poppins',
+                    ),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 16),
+                  Expanded(
+                    child: ListView.builder(
+                      itemBuilder: (ctx, index) {
+                        final item = papers[index];
+
+                        return CustomListTile(
+                          title: item.category,
+                          subTitle: item.title,
+                          description: item.abstract,
+                        );
+                      },
+
+                      itemCount: papers.length,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],
