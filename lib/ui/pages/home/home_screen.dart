@@ -1,4 +1,5 @@
 import 'package:arxivinder/data/model/paper.dart';
+import 'package:arxivinder/ui/pages/recommendation/recommender_screen.dart';
 import 'package:arxivinder/ui/utils/custom_list_tile.dart';
 import 'package:arxivinder/ui/utils/dummy.dart';
 import 'package:flutter/material.dart';
@@ -104,11 +105,22 @@ class HomeState extends State<HomeScreen> {
                     child: ListView.builder(
                       itemBuilder: (ctx, index) {
                         final item = papers[index];
+                        return GestureDetector(
+                          onTap:
+                              () => {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => RecommenderScreen(),
+                                  ),
+                                ),
+                              },
 
-                        return CustomListTile(
-                          title: item.category,
-                          subTitle: item.title,
-                          description: item.abstract,
+                          child: CustomListTile(
+                            title: item.category,
+                            subTitle: item.title,
+                            description: item.abstract,
+                          ),
                         );
                       },
 
