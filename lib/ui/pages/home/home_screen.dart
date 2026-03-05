@@ -1,5 +1,6 @@
 import 'package:arxivinder/data/model/paper.dart';
-import 'package:arxivinder/ui/pages/recommendation/recommender_screen.dart';
+import 'package:arxivinder/ui/pages/auth/login/login_page_screen.dart';
+// import 'package:arxivinder/ui/pages/recommendation/recommender_screen.dart';
 import 'package:arxivinder/ui/utils/custom_list_tile.dart';
 import 'package:arxivinder/ui/utils/dummy.dart';
 import 'package:flutter/material.dart';
@@ -111,7 +112,7 @@ class HomeState extends State<HomeScreen> {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => RecommenderScreen(),
+                                    builder: (context) => LoginPageScreen(),
                                   ),
                                 ),
                               },
