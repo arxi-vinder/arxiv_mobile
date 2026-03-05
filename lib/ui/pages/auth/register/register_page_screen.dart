@@ -1,6 +1,10 @@
+import 'package:arxivinder/blocs/bottom_nav_bar_bloc.dart';
+import 'package:arxivinder/ui/pages/home/home_screen.dart';
+import 'package:arxivinder/ui/pages/root/root_navigation_screen.dart';
 import 'package:arxivinder/ui/utils/auth_button.dart';
 import 'package:arxivinder/ui/utils/custom_textfield.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class RegisterPageScreen extends StatefulWidget {
   const RegisterPageScreen({super.key});
@@ -49,7 +53,7 @@ class RegisterPageState extends State<RegisterPageScreen> {
                     const SizedBox(height: 20),
 
                     const Text(
-                      'Masuk ke\nakun Anda',
+                      'Registrasi ke\nakun Anda',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: Colors.white,
@@ -93,17 +97,33 @@ class RegisterPageState extends State<RegisterPageScreen> {
                           AuthTextField(hintText: "Hali", isPassword: true),
 
                           SizedBox(height: 30),
-                          AuthButton(caption: "Registrasi", action: () => {}),
+                          AuthButton(
+                            caption: "Registrasi",
+                            action:
+                                () => {
+                                  Navigator.pushAndRemoveUntil(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder:
+                                          (context) => BlocProvider(
+                                            create:
+                                                (context) => BottomNavBarBloc(),
+                                            child: const RootNavigationScreen(),
+                                          ),
+                                    ),
+                                    (route) => false,
+                                  ),
+                                },
+                          ),
 
                           SizedBox(height: 30),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
-                                "Belum Punya akun ?",
+                                "Sudah Punya akun ?",
                                 style: TextStyle(
-                                  fontFamily: "Inter",
-                                  fontSize: 15,
+                                  fontSize: 12,
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),
@@ -111,7 +131,7 @@ class RegisterPageState extends State<RegisterPageScreen> {
                               Text(
                                 "Registrasi",
                                 style: TextStyle(
-                                  fontFamily: "Inter",
+                                  fontFamily: "Roboto",
                                   fontSize: 12,
                                   color: Colors.blue,
                                   fontWeight: FontWeight.w600,
