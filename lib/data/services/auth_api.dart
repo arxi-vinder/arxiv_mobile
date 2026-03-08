@@ -1,10 +1,11 @@
 import 'dart:convert';
 import 'package:arxivinder/data/model/auth_request.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:arxivinder/data/model/auth_response.dart';
 
 class AuthApi {
-  final String baseurl = "https://c178-157-85-211-134.ngrok-free.app";
+  final String? baseurl = dotenv.env['BASEURL'];
 
   Future<AuthResponse> register(AuthRequest request) async {
     final url = Uri.parse('$baseurl/api/v1/auth/register');
