@@ -10,7 +10,6 @@ class RegisterAuthBloc extends Bloc<RegisterAuthEvent, StateRegisterAuth> {
 
   RegisterAuthBloc({required this.authApi}) : super(RegisterInitial()) {
     on<RegisterSubmitted>(_onRegisterSubmitted);
-    // on<RegisterReset>(_onRegisterReset);
   }
 
   Future<void> _onRegisterSubmitted(
@@ -23,7 +22,7 @@ class RegisterAuthBloc extends Bloc<RegisterAuthEvent, StateRegisterAuth> {
       final response = await authApi.register(event.authRequest);
       debugPrint('Register response: $response');
 
-      if (response.status == 'success' || response.status == '200') {
+      if (response.status == '200') {
         await SecureStorageService.saveUserData(
           response.accessToken,
           response.username,
@@ -37,11 +36,4 @@ class RegisterAuthBloc extends Bloc<RegisterAuthEvent, StateRegisterAuth> {
       emit(RegisterFailure(e.toString()));
     }
   }
-
-  // Future<void> _onRegisterReset(
-  //   RegisterReset event,
-  //   Emitter<StateRegisterAuth> emit,
-  // ) async {
-  //   emit(RegisterInitial());
-  // }
 }
