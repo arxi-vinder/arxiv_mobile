@@ -173,7 +173,6 @@ class HomeState extends State<HomeScreen> {
             child: Container(
               width: double.infinity,
               decoration: BoxDecoration(
-                // Lebih umum digunakan daripada ShapeDecoration untuk list
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
                   color: const Color.fromARGB(255, 198, 160, 160),
@@ -197,44 +196,46 @@ class HomeState extends State<HomeScreen> {
                     child: FutureBuilder<bool>(
                       future: _isLoggedIn,
                       builder: (context, snapshot) {
-                        if (snapshot.data == true) {
-                          return ListView.builder(
-                            itemBuilder: (ctx, index) {
-                              final item = papers[index];
-                              return GestureDetector(
-                                onTap:
-                                    () => {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder:
-                                              (context) => DetailPaperScreen(),
-                                        ),
-                                      ),
-                                    },
-
-                                child: CustomListTile(
-                                  title: item.category,
-                                  subTitle: item.title,
-                                  description: item.abstract,
-                                ),
-                              );
-                            },
-
-                            itemCount: papers.length,
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return const Center(
+                            child: CircularProgressIndicator(),
                           );
                         }
+                        final bool isLoggedIn = snapshot.data ?? false;
+                        return ListView.builder(
+                          itemCount: papers.length,
+                          itemBuilder: (ctx, index) {
+                            final item = papers[index];
 
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return const CircularProgressIndicator(
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              Colors.white,
-                            ),
-                          );
-                        }
-
-                        return const LoginPageScreen();
+                            return GestureDetector(
+                              onTap: () {
+                                if (isLoggedIn) {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder:
+                                          (context) =>
+                                              const DetailPaperScreen(),
+                                    ),
+                                  );
+                                } else {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder:
+                                          (context) => const LoginPageScreen(),
+                                    ),
+                                  );
+                                }
+                              },
+                              child: CustomListTile(
+                                title: item.category,
+                                subTitle: item.title,
+                                description: item.abstract,
+                              ),
+                            );
+                          },
+                        );
                       },
                     ),
                   ),
