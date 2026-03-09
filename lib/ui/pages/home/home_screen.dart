@@ -1,5 +1,7 @@
 import 'package:arxivinder/data/model/paper.dart';
+import 'package:arxivinder/data/services/secure_storage_service.dart';
 import 'package:arxivinder/ui/pages/auth/login/login_page_screen.dart';
+import 'package:arxivinder/ui/pages/detail/detail_screen.dart/detail_paper_screen.dart';
 // import 'package:arxivinder/ui/pages/recommendation/recommender_screen.dart';
 import 'package:arxivinder/ui/utils/custom_list_tile.dart';
 import 'package:arxivinder/ui/utils/dummy.dart';
@@ -15,11 +17,69 @@ class HomeScreen extends StatefulWidget {
 }
 
 class HomeState extends State<HomeScreen> {
+  late Future<Map<String, String?>> _userFuture;
+  late Future<bool> _isLoggedIn;
+
+  @override
+  void initState() {
+    super.initState();
+    _userFuture = SecureStorageService.getUserData();
+    _isLoggedIn = SecureStorageService.isLoggedIn();
+  }
+
   @override
   Widget build(BuildContext context) {
     final List<Paper> papers = dummyPapers;
     final screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF3674B5),
+        elevation: 0,
+        actions: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: FutureBuilder<Map<String, String?>>(
+              future: _userFuture,
+              builder: (context, snapshot) {
+                String username = 'Guest';
+
+                if (snapshot.hasData) {
+                  final data = snapshot.data;
+                  if (data?['username'] != null &&
+                      data!['username']!.isNotEmpty) {
+                    username = data['username']!;
+                  }
+                }
+                return Center(
+                  child: Text(
+                    username,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                );
+              },
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.logout, color: Colors.white),
+            onPressed: () async {
+              final navigator = Navigator.of(context);
+              await SecureStorageService.clearUserData();
+              if (!mounted) return;
+              navigator.pushAndRemoveUntil(
+                MaterialPageRoute(
+                  builder: (context) => const LoginPageScreen(),
+                ),
+                (Route<dynamic> route) => false,
+              );
+            },
+          ),
+        ],
+      ),
       body: Stack(
         children: [
           Container(
@@ -67,14 +127,42 @@ class HomeState extends State<HomeScreen> {
                   ],
                 ),
                 SizedBox(height: 4),
-                Text(
-                  "Emmanuel Dito",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                    fontFamily: 'Poppins',
-                    fontWeight: FontWeight.w400,
-                  ),
+                FutureBuilder<Map<String, String?>>(
+                  future: _userFuture,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      );
+                    }
+
+                    if (snapshot.hasError) {
+                      debugPrint('Failed to load user data: ${snapshot.error}');
+                    }
+
+                    if (snapshot.hasData) {
+                      debugPrint('Snapshot data: ${snapshot.data}');
+                    }
+
+                    final data = snapshot.data;
+                    String username;
+                    if (data == null ||
+                        data['username'] == null ||
+                        data['username']!.isEmpty) {
+                      username = "Guest";
+                    } else {
+                      username = data['username']!;
+                    }
+                    return Text(
+                      username,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.w400,
+                      ),
+                    );
+                  },
                 ),
               ],
             ),
@@ -83,10 +171,12 @@ class HomeState extends State<HomeScreen> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 17, vertical: 200),
             child: Container(
-              decoration: ShapeDecoration(
-                shape: RoundedRectangleBorder(
-                  side: BorderSide(width: 1, color: const Color(0xFFCAB6B6)),
-                  borderRadius: BorderRadius.circular(8),
+              width: double.infinity,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: const Color.fromARGB(255, 198, 160, 160),
+                  width: 1,
                 ),
               ),
               margin: EdgeInsets.only(left: 2),
@@ -103,29 +193,50 @@ class HomeState extends State<HomeScreen> {
                   ),
                   const SizedBox(height: 16),
                   Expanded(
-                    child: ListView.builder(
-                      itemBuilder: (ctx, index) {
-                        final item = papers[index];
-                        return GestureDetector(
-                          onTap:
-                              () => {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => LoginPageScreen(),
-                                  ),
-                                ),
-                              },
+                    child: FutureBuilder<bool>(
+                      future: _isLoggedIn,
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        }
+                        final bool isLoggedIn = snapshot.data ?? false;
+                        return ListView.builder(
+                          itemCount: papers.length,
+                          itemBuilder: (ctx, index) {
+                            final item = papers[index];
 
-                          child: CustomListTile(
-                            title: item.category,
-                            subTitle: item.title,
-                            description: item.abstract,
-                          ),
+                            return GestureDetector(
+                              onTap: () {
+                                if (isLoggedIn) {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder:
+                                          (context) =>
+                                              const DetailPaperScreen(),
+                                    ),
+                                  );
+                                } else {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder:
+                                          (context) => const LoginPageScreen(),
+                                    ),
+                                  );
+                                }
+                              },
+                              child: CustomListTile(
+                                title: item.category,
+                                subTitle: item.title,
+                                description: item.abstract,
+                              ),
+                            );
+                          },
                         );
                       },
-
-                      itemCount: papers.length,
                     ),
                   ),
                 ],
