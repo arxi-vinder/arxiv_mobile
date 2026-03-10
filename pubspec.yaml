@@ -12,6 +12,9 @@ dependencies:
   flutter_bloc: ^9.1.1
   equatable: ^2.0.8
   http: ^1.6.0
+  dio: ^5.9.2
+  flutter_secure_storage: ^10.0.0
+  flutter_dotenv: ^6.0.0
 
 dev_dependencies:
   flutter_test:
@@ -20,6 +23,10 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+  assets:
+    - './assets/images/arxiv_register_logo.png'
+    - .env
 
   fonts:
     - family: Poppins
