@@ -1,11 +1,13 @@
-import 'package:arxivinder/data/model/paper.dart';
+import 'package:arxivinder/blocs/papers/paper_bloc.dart';
+import 'package:arxivinder/blocs/papers/paper_event_bloc.dart';
+import 'package:arxivinder/blocs/papers/paper_state_bloc.dart';
 import 'package:arxivinder/data/services/secure_storage_service.dart';
 import 'package:arxivinder/ui/pages/auth/login/login_page_screen.dart';
 import 'package:arxivinder/ui/pages/detail/detail_screen.dart/detail_paper_screen.dart';
 // import 'package:arxivinder/ui/pages/recommendation/recommender_screen.dart';
 import 'package:arxivinder/ui/utils/custom_list_tile.dart';
-import 'package:arxivinder/ui/utils/dummy.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -25,11 +27,13 @@ class HomeState extends State<HomeScreen> {
     super.initState();
     _userFuture = SecureStorageService.getUserData();
     _isLoggedIn = SecureStorageService.isLoggedIn();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<PaperBloc>().add(const GetAllPapers());
+  });
   }
 
   @override
   Widget build(BuildContext context) {
-    final List<Paper> papers = dummyPapers;
     final screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
       appBar: AppBar(
@@ -202,37 +206,61 @@ class HomeState extends State<HomeScreen> {
                           );
                         }
                         final bool isLoggedIn = snapshot.data ?? false;
-                        return ListView.builder(
-                          itemCount: papers.length,
-                          itemBuilder: (ctx, index) {
-                            final item = papers[index];
 
-                            return GestureDetector(
-                              onTap: () {
-                                if (isLoggedIn) {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder:
-                                          (context) =>
-                                              const DetailPaperScreen(),
+                        return BlocBuilder<PaperBloc, PaperStateBloc>(
+                          builder: (context, state) {
+                            if (state is FetchLoading) {
+                              return const Center(
+                                child: CircularProgressIndicator(),
+                              );
+                            } else if (state is FetchSuccess) {
+                              final papers = state.papers;
+                              if (papers.isEmpty) {
+                                return const Center(
+                                  child: Text('Tidak ada paper tersedia'),
+                                );
+                              }
+                              return ListView.builder(
+                                itemCount: papers.length,
+                                itemBuilder: (ctx, index) {
+                                  final item = papers[index];
+
+                                  return GestureDetector(
+                                    onTap: () {
+                                      if (isLoggedIn) {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder:
+                                                (context) =>
+                                                    const DetailPaperScreen(),
+                                          ),
+                                        );
+                                      } else {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder:
+                                                (context) => const LoginPageScreen(),
+                                          ),
+                                        );
+                                      }
+                                    },
+                                    child: CustomListTile(
+                                      title: item.category,
+                                      subTitle: item.title,
+                                      description: item.abstract,
                                     ),
                                   );
-                                } else {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder:
-                                          (context) => const LoginPageScreen(),
-                                    ),
-                                  );
-                                }
-                              },
-                              child: CustomListTile(
-                                title: item.category,
-                                subTitle: item.title,
-                                description: item.abstract,
-                              ),
+                                },
+                              );
+                            } else if (state is FetchFailure) {
+                              return Center(
+                                child: Text('Error: ${state.error}'),
+                              );
+                            }
+                            return const Center(
+                              child: Text('Tidak ada data'),
                             );
                           },
                         );
