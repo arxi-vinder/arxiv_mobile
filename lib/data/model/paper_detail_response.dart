@@ -17,6 +17,18 @@ class PaperDetailResponse extends Equatable {
     required this.author,
   });
 
+  factory PaperDetailResponse.fromJson(Map<String, dynamic> json) {
+    final data = json['detail'] ?? json;
+    return PaperDetailResponse(
+      title: data['title'] ?? '',
+      abstract: data['abstract'] ?? '',
+      category: data['category'] ?? '',
+      id: data['id'] ?? 0,
+      url: data['url'] ?? '',
+      author: data['author'] ?? '',
+    );
+  }
+
   @override
   List<Object?> get props => [title, abstract, category, id, url, author];
 }
