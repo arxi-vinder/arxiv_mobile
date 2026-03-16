@@ -10,7 +10,6 @@ class DetailPaperApi {
 
   Future<PaperDetailResponse> getPaper(int id) async {
     final url = Uri.parse('$baseurl/api/v1/paper/$id');
-    debugPrint('=== API CALL START ===');
     debugPrint('URL: $url');
 
     try {
@@ -22,7 +21,6 @@ class DetailPaperApi {
         },
       );
 
-      debugPrint('=== RESPONSE RECEIVED ===');
       debugPrint('Status Code: ${response.statusCode}');
       debugPrint('Response body: ${response.body}');
       
@@ -35,7 +33,6 @@ class DetailPaperApi {
         throw Exception('Gagal mengambil detail paper: ${response.statusCode}');
       }
     } catch (e) {
-      debugPrint('=== EXCEPTION CAUGHT ===');
       debugPrint('Error: $e');
       throw Exception('Terjadi kesalahan: $e');
     }
