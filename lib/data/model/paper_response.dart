@@ -22,7 +22,10 @@ class PaperResponse extends Equatable {
     final data = json['data'] ?? {};
     return PaperResponse(
       status: json['status'],
-      id: data['id'],
+      id:
+          data['id'] is int
+              ? data['id']
+              : int.tryParse(data['id']?.toString() ?? '0') ?? 0,
       category: data['category'],
       title: data['title'],
       abstract: data['abstract'],
