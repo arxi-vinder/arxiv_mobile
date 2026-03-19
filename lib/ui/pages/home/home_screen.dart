@@ -29,7 +29,7 @@ class HomeState extends State<HomeScreen> {
     _isLoggedIn = SecureStorageService.isLoggedIn();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<PaperBloc>().add(const GetAllPapers());
-  });
+    });
   }
 
   @override
@@ -200,7 +200,8 @@ class HomeState extends State<HomeScreen> {
                     child: FutureBuilder<bool>(
                       future: _isLoggedIn,
                       builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
                           return const Center(
                             child: CircularProgressIndicator(),
                           );
@@ -228,20 +229,25 @@ class HomeState extends State<HomeScreen> {
                                   return GestureDetector(
                                     onTap: () {
                                       if (isLoggedIn) {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder:
-                                                (context) =>
-                                                    const DetailPaperScreen(),
-                                          ),
-                                        );
+                                        if (item.id != 0) {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder:
+                                                  (context) =>
+                                                      DetailPaperScreen(
+                                                        id: item.id,
+                                                      ),
+                                            ),
+                                          );
+                                        } else {}
                                       } else {
                                         Navigator.push(
                                           context,
                                           MaterialPageRoute(
                                             builder:
-                                                (context) => const LoginPageScreen(),
+                                                (context) =>
+                                                    const LoginPageScreen(),
                                           ),
                                         );
                                       }
@@ -259,9 +265,7 @@ class HomeState extends State<HomeScreen> {
                                 child: Text('Error: ${state.error}'),
                               );
                             }
-                            return const Center(
-                              child: Text('Tidak ada data'),
-                            );
+                            return const Center(child: Text('Tidak ada data'));
                           },
                         );
                       },
