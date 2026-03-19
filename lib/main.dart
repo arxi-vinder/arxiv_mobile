@@ -1,4 +1,6 @@
 import 'package:arxivinder/blocs/bottom_nav_bar_bloc.dart';
+import 'package:arxivinder/blocs/papers/paper_bloc.dart';
+import 'package:arxivinder/data/services/papers_api.dart';
 import 'package:arxivinder/ui/pages/root/root_navigation_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -14,11 +16,14 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: BlocProvider(
-        create: (context) => BottomNavBarBloc(),
-        child: const RootNavigationScreen(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (_) => BottomNavBarBloc()),
+        BlocProvider(create: (_) => PaperBloc(api: PapersApi())),
+      ],
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: const RootNavigationScreen(),
       ),
     );
   }
