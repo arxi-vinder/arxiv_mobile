@@ -70,7 +70,7 @@ class RegisterPageState extends State<RegisterPageScreen> {
                       const SizedBox(height: 20),
 
                       const Text(
-                        'Registrasi ke\nakun Anddasda',
+                        'Registrasi ke\nakun Anda',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           color: Colors.white,
