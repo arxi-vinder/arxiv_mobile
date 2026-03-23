@@ -31,7 +31,8 @@ class RecommApi {
         debugPrint("Items: $items");
         return items
             .map((item) => PaperRecommendationResponse.fromJson(item))
-            .toList();
+            .toList()
+          ..sort((a, b) => b.ucbScore.compareTo(a.ucbScore));
       } else {
         debugPrint('ERROR: Status code ${response.statusCode}');
         throw Exception(
