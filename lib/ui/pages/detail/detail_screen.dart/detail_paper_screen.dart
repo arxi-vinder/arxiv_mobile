@@ -1,9 +1,13 @@
 import 'package:arxivinder/blocs/papers/detail/detail_paper_bloc.dart';
 import 'package:arxivinder/blocs/papers/detail/detail_paper_event.dart';
 import 'package:arxivinder/blocs/papers/detail/state_paper_detail_bloc.dart';
+import 'package:arxivinder/blocs/papers/feedback/feedback_paper_bloc.dart';
+import 'package:arxivinder/blocs/papers/feedback/feedback_paper_event.dart';
+import 'package:arxivinder/blocs/papers/feedback/state_feedback_paper_bloc.dart';
 import 'package:arxivinder/blocs/papers/recommendation/recommender_bloc.dart';
 import 'package:arxivinder/blocs/papers/recommendation/recommender_event_bloc.dart';
 import 'package:arxivinder/blocs/papers/recommendation/state_recommender_bloc.dart';
+import 'package:arxivinder/data/model/feedback_request.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -43,6 +47,16 @@ class DetailPaperState extends State<DetailPaperScreen> {
         BlocListener<RecommenderBloc, StateRecommenderBloc>(
           listener: (context, state) {
             if (state is InitialFailure) {
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text(state.error)));
+            }
+          },
+        ),
+
+        BlocListener<FeedbackPaperBloc, StateFeedbackPaperBloc>(
+          listener: (context, state) {
+            if (state is FeedbackFailure) {
               ScaffoldMessenger.of(
                 context,
               ).showSnackBar(SnackBar(content: Text(state.error)));
@@ -249,7 +263,7 @@ class DetailPaperState extends State<DetailPaperScreen> {
                                                           FontWeight.w600,
                                                     ),
                                                   ),
-                                                  const SizedBox(height: 6),
+                                                  const SizedBox(height: 8),
                                                   Container(
                                                     padding:
                                                         const EdgeInsets.symmetric(
@@ -266,14 +280,81 @@ class DetailPaperState extends State<DetailPaperScreen> {
                                                             6,
                                                           ),
                                                     ),
-                                                    child: Text(
-                                                      'Score ${recommendation.cosineScore.toStringAsFixed(2).replaceAll('.', ',')}',
-                                                      style: const TextStyle(
-                                                        fontSize: 11,
-                                                        fontWeight:
-                                                            FontWeight.w500,
-                                                        color: Colors.blue,
-                                                      ),
+                                                    child: Row(
+                                                      mainAxisSize:
+                                                          MainAxisSize.min,
+                                                      children: [
+                                                        Text(
+                                                          'Score ${recommendation.ucbScore.toStringAsFixed(2).replaceAll('.', ',')}',
+                                                          style:
+                                                              const TextStyle(
+                                                                fontSize: 11,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w500,
+                                                                color:
+                                                                    Colors.blue,
+                                                              ),
+                                                        ),
+                                                        const SizedBox(
+                                                          width: 25,
+                                                        ),
+                                                        GestureDetector(
+                                                          onTap: () {
+                                                            //update like menjadi filled , kasi nilai 1
+                                                            context.read<FeedbackPaperBloc>().add(
+                                                              FeedbackSubmitted(
+                                                                feedbackRequest:
+                                                                    FeedbackRequest(
+                                                                      paperId:
+                                                                          recommendation
+                                                                              .id,
+                                                                      feedbackValue:
+                                                                          1,
+                                                                    ),
+                                                              ),
+                                                            );
+                                                          },
+                                                          child: const Icon(
+                                                            Icons
+                                                                .thumb_up_outlined,
+                                                            size: 14,
+                                                            color: Colors.blue,
+                                                          ),
+                                                        ),
+                                                        const SizedBox(
+                                                          width: 8,
+                                                        ),
+                                                        GestureDetector(
+                                                          onTap: () {
+                                                            //kasi nilai 0
+                                                            context.read<FeedbackPaperBloc>().add(
+                                                              FeedbackSubmitted(
+                                                                feedbackRequest:
+                                                                    FeedbackRequest(
+                                                                      paperId:
+                                                                          recommendation
+                                                                              .id,
+                                                                      feedbackValue:
+                                                                          0,
+                                                                    ),
+                                                              ),
+                                                            );
+                                                          },
+                                                          child: const Icon(
+                                                            Icons
+                                                                .thumb_down_outlined,
+                                                            size: 14,
+                                                            color:
+                                                                Color.fromARGB(
+                                                                  255,
+                                                                  255,
+                                                                  0,
+                                                                  0,
+                                                                ),
+                                                          ),
+                                                        ),
+                                                      ],
                                                     ),
                                                   ),
                                                 ],
