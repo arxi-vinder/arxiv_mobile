@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 
 class PaperRecommendationResponse extends Equatable {
+  final String status;
   final int id;
   final String title;
   final double cosineScore;
@@ -9,6 +10,7 @@ class PaperRecommendationResponse extends Equatable {
   final double ucbScore;
 
   const PaperRecommendationResponse({
+    required this.status,
     required this.id,
     required this.title,
     required this.cosineScore,
@@ -19,6 +21,7 @@ class PaperRecommendationResponse extends Equatable {
 
   factory PaperRecommendationResponse.fromJson(Map<String, dynamic> json) {
     return PaperRecommendationResponse(
+      status: json['status'] ?? '',
       id: json['paper_id'] ?? 0,
       title: json['title'] ?? '',
       cosineScore: (json['cosine_score'] ?? 0).toDouble(),
@@ -53,7 +56,8 @@ class PaperRecommendationResponse extends Equatable {
       cosineScore: cosineScore ?? this.cosineScore,
       reward: reward ?? this.reward,
       totalAction: totalAction ?? this.totalAction,
-      ucbScore: ucbScore ?? this.ucbScore,
+      ucbScore: ucbScore ?? this.ucbScore, 
+      status: '',
     );
   }
 
