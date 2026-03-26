@@ -1,8 +1,10 @@
 import 'package:arxivinder/blocs/bottom_nav_bar_bloc.dart';
 import 'package:arxivinder/blocs/papers/detail/detail_paper_bloc.dart';
+import 'package:arxivinder/blocs/papers/feedback/feedback_paper_bloc.dart';
 import 'package:arxivinder/blocs/papers/paper_bloc.dart';
 import 'package:arxivinder/blocs/papers/recommendation/recommender_bloc.dart';
 import 'package:arxivinder/data/services/detail_paper_api.dart';
+import 'package:arxivinder/data/services/feedback_api.dart';
 import 'package:arxivinder/data/services/papers_api.dart';
 import 'package:arxivinder/data/services/recomm_api.dart';
 import 'package:arxivinder/ui/pages/root/root_navigation_screen.dart';
@@ -23,8 +25,11 @@ class MainApp extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (_) => BottomNavBarBloc()),
-        BlocProvider(create: (_)=> RecommenderBloc(api:RecommApi())),
+        BlocProvider(create: (_) => RecommenderBloc(api: RecommApi())),
         BlocProvider(create: (_) => PaperBloc(api: PapersApi())),
+        BlocProvider(
+          create: (_) => FeedbackPaperBloc(feedbackApi: FeedbackApi()),
+        ),
         BlocProvider(create: (_) => DetailPaperBloc(api: DetailPaperApi())),
       ],
       child: MaterialApp(
