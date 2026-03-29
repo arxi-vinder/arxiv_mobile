@@ -35,25 +35,6 @@ class DetailPaperState extends State<DetailPaperScreen> {
   Widget build(BuildContext context) {
     return MultiBlocListener(
       listeners: [
-        BlocListener<DetailPaperBloc, StatePaperDetailBloc>(
-          listener: (context, state) {
-            if (state is PaperDetailError) {
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(SnackBar(content: Text(state.message)));
-            }
-          },
-        ),
-        BlocListener<RecommenderBloc, StateRecommenderBloc>(
-          listener: (context, state) {
-            if (state is InitialFailure) {
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(SnackBar(content: Text(state.error)));
-            }
-          },
-        ),
-
         BlocListener<FeedbackPaperBloc, StateFeedbackPaperBloc>(
           listener: (context, state) {
             if (state is FeedbackFailure) {
@@ -280,14 +261,21 @@ class DetailPaperState extends State<DetailPaperScreen> {
                                                             6,
                                                           ),
                                                     ),
-                                                    child: Row(
-                                                      mainAxisSize:
-                                                          MainAxisSize.min,
-                                                      children: [
-                                                        Text(
-                                                          'Score ${recommendation.ucbScore.toStringAsFixed(2).replaceAll('.', ',')}',
-                                                          style:
-                                                              const TextStyle(
+                                                    child: BlocBuilder<
+                                                      FeedbackPaperBloc,
+                                                      StateFeedbackPaperBloc
+                                                    >(
+                                                      builder: (
+                                                        context,
+                                                        state,
+                                                      ) {
+                                                        return Row(
+                                                          mainAxisSize:
+                                                              MainAxisSize.min,
+                                                          children: [
+                                                            Text(
+                                                              'Score ${recommendation.ucbScore.toStringAsFixed(2).replaceAll('.', ',')}',
+                                                              style: const TextStyle(
                                                                 fontSize: 11,
                                                                 fontWeight:
                                                                     FontWeight
@@ -295,66 +283,73 @@ class DetailPaperState extends State<DetailPaperScreen> {
                                                                 color:
                                                                     Colors.blue,
                                                               ),
-                                                        ),
-                                                        const SizedBox(
-                                                          width: 25,
-                                                        ),
-                                                        GestureDetector(
-                                                          onTap: () {
-                                                            //update like menjadi filled , kasi nilai 1
-                                                            context.read<FeedbackPaperBloc>().add(
-                                                              FeedbackSubmitted(
-                                                                feedbackRequest:
-                                                                    FeedbackRequest(
-                                                                      paperId:
-                                                                          recommendation
-                                                                              .id,
-                                                                      feedbackValue:
-                                                                          1,
+                                                            ),
+                                                            const SizedBox(
+                                                              width: 25,
+                                                            ),
+                                                            GestureDetector(
+                                                              onTap: () {
+                                                                //update like menjadi filled , kasi nilai 1
+                                                                context
+                                                                    .read<
+                                                                      FeedbackPaperBloc
+                                                                    >()
+                                                                    .add(
+                                                                      FeedbackSubmitted(
+                                                                        feedbackRequest: FeedbackRequest(
+                                                                          paperId:
+                                                                              recommendation.id,
+                                                                          feedbackValue:
+                                                                              1,
+                                                                        ),
+                                                                      ),
+                                                                    );
+                                                              },
+                                                              child: const Icon(
+                                                                Icons
+                                                                    .thumb_up_outlined,
+                                                                size: 14,
+                                                                color:
+                                                                    Colors.blue,
+                                                              ),
+                                                            ),
+                                                            const SizedBox(
+                                                              width: 8,
+                                                            ),
+                                                            GestureDetector(
+                                                              onTap: () {
+                                                                //kasi nilai 0
+                                                                context
+                                                                    .read<
+                                                                      FeedbackPaperBloc
+                                                                    >()
+                                                                    .add(
+                                                                      FeedbackSubmitted(
+                                                                        feedbackRequest: FeedbackRequest(
+                                                                          paperId:
+                                                                              recommendation.id,
+                                                                          feedbackValue:
+                                                                              0,
+                                                                        ),
+                                                                      ),
+                                                                    );
+                                                              },
+                                                              child: const Icon(
+                                                                Icons
+                                                                    .thumb_down_outlined,
+                                                                size: 14,
+                                                                color:
+                                                                    Color.fromARGB(
+                                                                      255,
+                                                                      255,
+                                                                      0,
+                                                                      0,
                                                                     ),
                                                               ),
-                                                            );
-                                                          },
-                                                          child: const Icon(
-                                                            Icons
-                                                                .thumb_up_outlined,
-                                                            size: 14,
-                                                            color: Colors.blue,
-                                                          ),
-                                                        ),
-                                                        const SizedBox(
-                                                          width: 8,
-                                                        ),
-                                                        GestureDetector(
-                                                          onTap: () {
-                                                            //kasi nilai 0
-                                                            context.read<FeedbackPaperBloc>().add(
-                                                              FeedbackSubmitted(
-                                                                feedbackRequest:
-                                                                    FeedbackRequest(
-                                                                      paperId:
-                                                                          recommendation
-                                                                              .id,
-                                                                      feedbackValue:
-                                                                          0,
-                                                                    ),
-                                                              ),
-                                                            );
-                                                          },
-                                                          child: const Icon(
-                                                            Icons
-                                                                .thumb_down_outlined,
-                                                            size: 14,
-                                                            color:
-                                                                Color.fromARGB(
-                                                                  255,
-                                                                  255,
-                                                                  0,
-                                                                  0,
-                                                                ),
-                                                          ),
-                                                        ),
-                                                      ],
+                                                            ),
+                                                          ],
+                                                        );
+                                                      },
                                                     ),
                                                   ),
                                                 ],
