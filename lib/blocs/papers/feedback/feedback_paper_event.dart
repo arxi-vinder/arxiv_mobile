@@ -15,3 +15,7 @@ class FeedbackSubmitted extends FeedbackPaperEvent {
   @override
   List<Object?> get props => [feedbackRequest];
 }
+
+class FeedbackReset extends FeedbackPaperEvent {
+  const FeedbackReset();
+}
