@@ -6,10 +6,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class FeedbackPaperBloc
     extends Bloc<FeedbackPaperEvent, StateFeedbackPaperBloc> {
   final FeedbackApi feedbackApi;
+  final Map<int, int> _feedbackMap = {};
+  Map<int, int> get feedbackMap => Map.unmodifiable(_feedbackMap);
 
   FeedbackPaperBloc({required this.feedbackApi})
-    : super(FeedbackLoadInitial()) {
+      : super(FeedbackLoadInitial()) {
     on<FeedbackSubmitted>(_onFeedbackSubmitted);
+    on<FeedbackReset>(_onFeedbackReset);
   }
 
   Future<void> _onFeedbackSubmitted(
@@ -21,12 +24,25 @@ class FeedbackPaperBloc
     try {
       final response = await feedbackApi.sendFeedback(event.feedbackRequest);
       if (response.status == 'success' || response.status == '200') {
-        emit(FeedbackSuccess(response.status));
+        _feedbackMap[event.feedbackRequest.paperId] =
+            event.feedbackRequest.feedbackValue;
+        emit(FeedbackSuccess(
+          response.status,
+          paperId: event.feedbackRequest.paperId,
+        ));
       } else {
         emit(FeedbackFailure(response.status));
       }
     } catch (e) {
       emit(FeedbackFailure(e.toString()));
     }
+  }
+
+  void _onFeedbackReset(
+    FeedbackReset event,
+    Emitter<StateFeedbackPaperBloc> emit,
+  ) {
+    _feedbackMap.clear();
+    emit(FeedbackLoadInitial());
   }
 }
