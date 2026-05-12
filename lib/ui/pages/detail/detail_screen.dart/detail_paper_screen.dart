@@ -142,8 +142,7 @@ class DetailPaperState extends State<DetailPaperScreen> {
                     const SizedBox(height: 30),
 
                     Container(
-                      width: 438,
-                      height: 274,
+                      width: double.infinity,
                       decoration: const BoxDecoration(
                         gradient: LinearGradient(
                           begin: Alignment.topCenter,
@@ -154,218 +153,294 @@ class DetailPaperState extends State<DetailPaperScreen> {
                           ],
                         ),
                       ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            "Lebih banyak untuk anda",
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                              fontFamily: "Inter",
-                            ),
-                          ),
-
-                          BlocBuilder<RecommenderBloc, StateRecommenderBloc>(
-                            builder: (context, state) {
-                              if (state is InitialLoading) {
-                                return const Center(
-                                  child: CircularProgressIndicator(),
-                                );
-                              }
-
-                              if (state is InitialFailure) {
-                                return Center(child: Text(state.error));
-                              }
-
-                              if (state is InitialSuccess) {
-                                return SizedBox(
-                                  height: 200,
-                                  child: ListView.builder(
-                                    scrollDirection: Axis.horizontal,
-                                    itemCount: state.papers.length,
-                                    itemBuilder: (context, index) {
-                                      final recommendation =
-                                          state.papers[index];
-
-                                      return Container(
-                                        width: 170,
-                                        margin: const EdgeInsets.only(
-                                          right: 16,
-                                        ),
-                                        child: Material(
-                                          borderRadius: BorderRadius.circular(
-                                            12,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 16,
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Text(
+                                  "Lebih banyak untuk anda",
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                    fontFamily: "Inter",
+                                  ),
+                                ),
+                                BlocBuilder<FeedbackPaperBloc,
+                                    StateFeedbackPaperBloc>(
+                                  builder: (context, feedbackState) {
+                                    final hasFeedback = context
+                                        .read<FeedbackPaperBloc>()
+                                        .feedbackMap
+                                        .isNotEmpty;
+                                    return GestureDetector(
+                                      onTap: () {
+                                        context
+                                            .read<FeedbackPaperBloc>()
+                                            .add(const FeedbackReset());
+                                      },
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(
+                                            Icons.refresh,
+                                            size: 16,
+                                            color: hasFeedback
+                                                ? Colors.white
+                                                : Colors.white54,
                                           ),
-                                          elevation: 3,
-                                          color: Colors.white,
-                                          child: InkWell(
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            "Reset",
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              color: hasFeedback
+                                                  ? Colors.white
+                                                  : Colors.white54,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+
+                            BlocBuilder<RecommenderBloc, StateRecommenderBloc>(
+                              builder: (context, recommState) {
+                                if (recommState is InitialLoading) {
+                                  return const Center(
+                                    child: CircularProgressIndicator(),
+                                  );
+                                }
+
+                                if (recommState is InitialFailure) {
+                                  return Center(
+                                      child: Text(recommState.error));
+                                }
+
+                                if (recommState is InitialSuccess) {
+                                  return SizedBox(
+                                    height: 200,
+                                    child: ListView.builder(
+                                      scrollDirection: Axis.horizontal,
+                                      itemCount: recommState.papers.length,
+                                      itemBuilder: (context, index) {
+                                        final recommendation =
+                                            recommState.papers[index];
+
+                                        return Container(
+                                          width: 170,
+                                          margin: const EdgeInsets.only(
+                                            right: 16,
+                                          ),
+                                          child: Material(
                                             borderRadius: BorderRadius.circular(
                                               12,
                                             ),
-                                            onTap: () {},
-                                            child: Padding(
-                                              padding: const EdgeInsets.all(10),
-                                              child: Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Container(
-                                                    height: 100,
-                                                    decoration: BoxDecoration(
-                                                      gradient: LinearGradient(
-                                                        colors: [
-                                                          Colors.blue.shade100,
-                                                          Colors.blue.shade50,
-                                                        ],
+                                            elevation: 3,
+                                            color: Colors.white,
+                                            child: InkWell(
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
+                                              onTap: () {},
+                                              child: Padding(
+                                                padding: const EdgeInsets.all(
+                                                  10,
+                                                ),
+                                                child: Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Container(
+                                                      height: 100,
+                                                      decoration: BoxDecoration(
+                                                        gradient:
+                                                            LinearGradient(
+                                                              colors: [
+                                                                Colors
+                                                                    .blue
+                                                                    .shade100,
+                                                                Colors
+                                                                    .blue
+                                                                    .shade50,
+                                                              ],
+                                                            ),
+                                                        borderRadius:
+                                                            BorderRadius.circular(
+                                                              10,
+                                                            ),
                                                       ),
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                            10,
-                                                          ),
-                                                    ),
-                                                    child: const Center(
-                                                      child: Icon(
-                                                        Icons.article_outlined,
-                                                        size: 40,
-                                                        color: Colors.blue,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  const SizedBox(height: 10),
-                                                  Text(
-                                                    recommendation.title,
-                                                    maxLines: 2,
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
-                                                    style: const TextStyle(
-                                                      fontSize: 13,
-                                                      fontWeight:
-                                                          FontWeight.w600,
-                                                    ),
-                                                  ),
-                                                  const SizedBox(height: 8),
-                                                  Container(
-                                                    padding:
-                                                        const EdgeInsets.symmetric(
-                                                          horizontal: 8,
-                                                          vertical: 4,
+                                                      child: const Center(
+                                                        child: Icon(
+                                                          Icons
+                                                              .article_outlined,
+                                                          size: 40,
+                                                          color: Colors.blue,
                                                         ),
-                                                    decoration: BoxDecoration(
-                                                      color: Colors.blue
-                                                          .withValues(
-                                                            alpha: 0.1,
-                                                          ),
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                            6,
-                                                          ),
+                                                      ),
                                                     ),
-                                                    child: BlocBuilder<
-                                                      FeedbackPaperBloc,
-                                                      StateFeedbackPaperBloc
-                                                    >(
-                                                      builder: (
-                                                        context,
-                                                        state,
-                                                      ) {
-                                                        return Row(
-                                                          mainAxisSize:
-                                                              MainAxisSize.min,
-                                                          children: [
-                                                            Text(
-                                                              'Score ${recommendation.ucbScore.toStringAsFixed(2).replaceAll('.', ',')}',
-                                                              style: const TextStyle(
-                                                                fontSize: 11,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .w500,
-                                                                color:
-                                                                    Colors.blue,
-                                                              ),
-                                                            ),
-                                                            const SizedBox(
-                                                              width: 25,
-                                                            ),
-                                                            GestureDetector(
-                                                              onTap: () {
-                                                                //update like menjadi filled , kasi nilai 1
-                                                                context
-                                                                    .read<
-                                                                      FeedbackPaperBloc
-                                                                    >()
-                                                                    .add(
-                                                                      FeedbackSubmitted(
-                                                                        feedbackRequest: FeedbackRequest(
-                                                                          paperId:
-                                                                              recommendation.id,
-                                                                          feedbackValue:
-                                                                              1,
-                                                                        ),
-                                                                      ),
-                                                                    );
-                                                              },
-                                                              child: const Icon(
-                                                                Icons
-                                                                    .thumb_up_outlined,
-                                                                size: 14,
-                                                                color:
-                                                                    Colors.blue,
-                                                              ),
-                                                            ),
-                                                            const SizedBox(
-                                                              width: 8,
-                                                            ),
-                                                            GestureDetector(
-                                                              onTap: () {
-                                                                //kasi nilai 0
-                                                                context
-                                                                    .read<
-                                                                      FeedbackPaperBloc
-                                                                    >()
-                                                                    .add(
-                                                                      FeedbackSubmitted(
-                                                                        feedbackRequest: FeedbackRequest(
-                                                                          paperId:
-                                                                              recommendation.id,
-                                                                          feedbackValue:
-                                                                              0,
-                                                                        ),
-                                                                      ),
-                                                                    );
-                                                              },
-                                                              child: const Icon(
-                                                                Icons
-                                                                    .thumb_down_outlined,
-                                                                size: 14,
-                                                                color:
-                                                                    Color.fromARGB(
-                                                                      255,
-                                                                      255,
-                                                                      0,
-                                                                      0,
-                                                                    ),
-                                                              ),
-                                                            ),
-                                                          ],
-                                                        );
-                                                      },
+                                                    const SizedBox(height: 10),
+                                                    Text(
+                                                      recommendation.title,
+                                                      maxLines: 2,
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                      style: const TextStyle(
+                                                        fontSize: 13,
+                                                        fontWeight:
+                                                            FontWeight.w600,
+                                                      ),
                                                     ),
-                                                  ),
-                                                ],
+                                                    const SizedBox(height: 8),
+                                                    Container(
+                                                      padding:
+                                                          const EdgeInsets.symmetric(
+                                                            horizontal: 8,
+                                                            vertical: 4,
+                                                          ),
+                                                      decoration: BoxDecoration(
+                                                        color: Colors.blue
+                                                            .withValues(
+                                                              alpha: 0.1,
+                                                            ),
+                                                        borderRadius:
+                                                            BorderRadius.circular(
+                                                              6,
+                                                            ),
+                                                      ),
+                                                      child: BlocBuilder<
+                                                        FeedbackPaperBloc,
+                                                        StateFeedbackPaperBloc
+                                                      >(
+                                                        builder: (
+                                                          context,
+                                                          feedbackState,
+                                                        ) {
+                                                          final feedbackValue =
+                                                              context
+                                                                  .read<FeedbackPaperBloc>()
+                                                                  .feedbackMap[recommendation.id];
+                                                          final isLiked =
+                                                              feedbackValue ==
+                                                                  1;
+                                                          final isDisliked =
+                                                              feedbackValue ==
+                                                                  0;
+
+                                                          return Row(
+                                                            mainAxisSize:
+                                                                MainAxisSize
+                                                                    .min,
+                                                            children: [
+                                                              Text(
+                                                                'Score ${recommendation.ucbScore.toStringAsFixed(2).replaceAll('.', ',')}',
+                                                                style: const TextStyle(
+                                                                  fontSize: 11,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w500,
+                                                                  color:
+                                                                      Colors
+                                                                          .blue,
+                                                                ),
+                                                              ),
+                                                              const SizedBox(
+                                                                width: 25,
+                                                              ),
+                                                              GestureDetector(
+                                                                onTap: () {
+                                                                  context
+                                                                      .read<
+                                                                        FeedbackPaperBloc
+                                                                      >()
+                                                                      .add(
+                                                                        FeedbackSubmitted(
+                                                                          feedbackRequest: FeedbackRequest(
+                                                                            paperId:
+                                                                                recommendation.id,
+                                                                            feedbackValue:
+                                                                                1,
+                                                                          ),
+                                                                        ),
+                                                                      );
+                                                                },
+                                                                child: Icon(
+                                                                  isLiked
+                                                                      ? Icons
+                                                                          .thumb_up
+                                                                      : Icons
+                                                                          .thumb_up_outlined,
+                                                                  size: 14,
+                                                                  color: isLiked
+                                                                      ? Colors
+                                                                          .blue
+                                                                      : Colors
+                                                                          .grey,
+                                                                ),
+                                                              ),
+                                                              const SizedBox(
+                                                                width: 8,
+                                                              ),
+                                                              GestureDetector(
+                                                                onTap: () {
+                                                                  context
+                                                                      .read<
+                                                                        FeedbackPaperBloc
+                                                                      >()
+                                                                      .add(
+                                                                        FeedbackSubmitted(
+                                                                          feedbackRequest: FeedbackRequest(
+                                                                            paperId:
+                                                                                recommendation.id,
+                                                                            feedbackValue:
+                                                                                0,
+                                                                          ),
+                                                                        ),
+                                                                      );
+                                                                },
+                                                                child: Icon(
+                                                                  isDisliked
+                                                                      ? Icons
+                                                                          .thumb_down
+                                                                      : Icons
+                                                                          .thumb_down_outlined,
+                                                                  size: 14,
+                                                                  color: isDisliked
+                                                                      ? Colors
+                                                                          .red
+                                                                      : Colors
+                                                                          .grey,
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          );
+                                                        },
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
                                               ),
                                             ),
                                           ),
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                );
-                              }
-                              return const SizedBox.shrink();
-                            },
-                          ),
-                        ],
+                                        );
+                                      },
+                                    ),
+                                  );
+                                }
+                                return const SizedBox.shrink();
+                              },
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ],
