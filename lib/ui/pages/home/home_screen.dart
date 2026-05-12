@@ -4,7 +4,6 @@ import 'package:arxivinder/blocs/papers/paper_state_bloc.dart';
 import 'package:arxivinder/data/services/secure_storage_service.dart';
 import 'package:arxivinder/ui/pages/auth/login/login_page_screen.dart';
 import 'package:arxivinder/ui/pages/detail/detail_screen.dart/detail_paper_screen.dart';
-// import 'package:arxivinder/ui/pages/recommendation/recommender_screen.dart';
 import 'package:arxivinder/ui/utils/custom_list_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -36,6 +35,7 @@ class HomeState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: const Color(0xFF3674B5),
         elevation: 0,
@@ -46,7 +46,6 @@ class HomeState extends State<HomeScreen> {
               future: _userFuture,
               builder: (context, snapshot) {
                 String username = 'Guest';
-
                 if (snapshot.hasData) {
                   final data = snapshot.data;
                   if (data?['username'] != null &&
@@ -86,11 +85,12 @@ class HomeState extends State<HomeScreen> {
       ),
       body: Stack(
         children: [
+          // Background Biru di Atas
           Container(
             width: screenWidth,
-            height: 188,
-            decoration: ShapeDecoration(
-              color: const Color(0xFF3674B5),
+            height: 180, 
+            decoration: const ShapeDecoration(
+              color: Color(0xFF3674B5),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.only(
                   bottomLeft: Radius.circular(32),
@@ -99,71 +99,51 @@ class HomeState extends State<HomeScreen> {
               ),
             ),
           ),
-          Container(
-            height: 188,
-            padding: EdgeInsets.only(left: 17),
-            alignment: Alignment.centerLeft,
+
+          Positioned(
+            top: 20,
+            left: 20,
             child: Column(
-              mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    Text(
-                      "Halo,",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 32,
-                        fontFamily: 'Poppins',
-                        fontWeight: FontWeight.w400,
-                      ),
-                    ),
-                    SizedBox(width: 8),
-                    Text(
-                      "Selamat Datang",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 32,
-                        fontFamily: 'Poppins',
-                        fontWeight: FontWeight.w400,
-                      ),
-                    ),
-                  ],
+                const Text(
+                  "Halo, Selamat Datang",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 28,
+                    fontFamily: 'Poppins',
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
-                SizedBox(height: 4),
+                const SizedBox(height: 4),
                 FutureBuilder<Map<String, String?>>(
                   future: _userFuture,
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      return const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Colors.white,
+                          ),
+                        ),
                       );
                     }
-
-                    if (snapshot.hasError) {
-                      debugPrint('Failed to load user data: ${snapshot.error}');
-                    }
-
-                    if (snapshot.hasData) {
-                      debugPrint('Snapshot data: ${snapshot.data}');
-                    }
-
                     final data = snapshot.data;
-                    String username;
-                    if (data == null ||
-                        data['username'] == null ||
-                        data['username']!.isEmpty) {
-                      username = "Guest";
-                    } else {
-                      username = data['username']!;
-                    }
+                    String username =
+                        (data == null ||
+                                data['username'] == null ||
+                                data['username']!.isEmpty)
+                            ? "Guest"
+                            : data['username']!;
                     return Text(
                       username,
                       style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
+                        color: Colors.white70,
+                        fontSize: 18,
                         fontFamily: 'Poppins',
-                        fontWeight: FontWeight.w400,
                       ),
                     );
                   },
@@ -171,31 +151,45 @@ class HomeState extends State<HomeScreen> {
               ],
             ),
           ),
-          SizedBox(height: 40),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 17, vertical: 200),
+        
+            padding: const EdgeInsets.only(
+              top: 150,
+              left: 17,
+              right: 17,
+              bottom: 10,
+            ),
             child: Container(
               width: double.infinity,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: const Color.fromARGB(255, 198, 160, 160),
+                  color: const Color.fromARGB(255, 230, 230, 230),
                   width: 1,
                 ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, 5),
+                  ),
+                ],
               ),
-              margin: EdgeInsets.only(left: 2),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    "Rekomendasi Untuk Anda",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'Poppins',
+                  const Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: Text(
+                      "Rekomendasi Untuk Anda",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Poppins',
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 16),
                   Expanded(
                     child: FutureBuilder<bool>(
                       future: _isLoggedIn,
@@ -222,10 +216,12 @@ class HomeState extends State<HomeScreen> {
                                 );
                               }
                               return ListView.builder(
+                                padding: const EdgeInsets.only(
+                                  bottom: 20,
+                                ), 
                                 itemCount: papers.length,
                                 itemBuilder: (ctx, index) {
                                   final item = papers[index];
-
                                   return GestureDetector(
                                     onTap: () {
                                       if (isLoggedIn) {
@@ -240,7 +236,7 @@ class HomeState extends State<HomeScreen> {
                                                       ),
                                             ),
                                           );
-                                        } else {}
+                                        }
                                       } else {
                                         Navigator.push(
                                           context,
