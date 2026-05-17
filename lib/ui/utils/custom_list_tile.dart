@@ -16,14 +16,18 @@ class CustomListTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       shape: RoundedRectangleBorder(
-        side: BorderSide(color: Colors.blueGrey, width: 2.0),
-        borderRadius: BorderRadius.circular(12.0),
+        side: const BorderSide(
+          color: Color.fromARGB(255, 200, 210, 220),
+          width: 1.5,
+        ),
+        borderRadius: BorderRadius.circular(12),
       ),
       elevation: 0,
-      color: Colors.transparent,
+      color: Colors.white,
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 12),
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 14),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               subTitle,
@@ -31,34 +35,34 @@ class CustomListTile extends StatelessWidget {
                 fontSize: 12,
                 fontFamily: 'Poppins',
                 fontWeight: FontWeight.w500,
-                color: Colors.black,
-                height: 1.33,
-                letterSpacing: 0.50,
+                color: Color(0xFF3674B5),
+                height: 1.3,
+                letterSpacing: 0.3,
               ),
             ),
-
-            const SizedBox(height: 4),
-
+            const SizedBox(height: 6),
             Text(
               title,
               style: const TextStyle(
                 fontSize: 16,
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w700,
                 color: Colors.black,
-                height: 1.50,
-                letterSpacing: -0.5,
+                height: 1.4,
+                letterSpacing: -0.3,
               ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             ),
-
+            const SizedBox(height: 8),
             Text(
               description,
               style: const TextStyle(
                 fontSize: 14,
                 color: Colors.black87,
-                height: 1.43,
-                letterSpacing: 0.25,
+                height: 1.5,
+                letterSpacing: 0.2,
               ),
-              maxLines: 4,
+              maxLines: 3,
               overflow: TextOverflow.ellipsis,
             ),
           ],
