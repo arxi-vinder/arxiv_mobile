@@ -8,6 +8,8 @@ class PaperBloc extends Bloc<PaperEventBloc, PaperStateBloc> {
 
   PaperBloc({required this.api}) : super(FetchInitial()) {
     on<GetAllPapers>(_getPaperFetched);
+    on<GetPapersSortedBy>(_getPapersSortedBy);
+    on<GetPapersByDateRange>(_getPapersByDateRange);
   }
 
   Future<void> _getPaperFetched(
@@ -19,6 +21,50 @@ class PaperBloc extends Bloc<PaperEventBloc, PaperStateBloc> {
     try {
       final papers = await api.getPapers();
       emit(FetchSuccess(papers));
+    } catch (e) {
+      emit(FetchFailure(e.toString()));
+    }
+  }
+
+  Future<void> _getPapersSortedBy(
+    GetPapersSortedBy event,
+    Emitter<PaperStateBloc> emit,
+  ) async {
+    emit(FetchLoading());
+
+    try {
+      final papers = await api.getPapers(
+        sort: event.sort,
+        limit: event.limit,
+      );
+      emit(FetchSuccess(
+        papers,
+        sortBy: event.sort,
+      ));
+    } catch (e) {
+      emit(FetchFailure(e.toString()));
+    }
+  }
+
+  Future<void> _getPapersByDateRange(
+    GetPapersByDateRange event,
+    Emitter<PaperStateBloc> emit,
+  ) async {
+    emit(FetchLoading());
+
+    try {
+      final papers = await api.getPapers(
+        startDate: event.startDate,
+        endDate: event.endDate,
+        sort: event.sort,
+        limit: event.limit,
+      );
+      emit(FetchSuccess(
+        papers,
+        sortBy: event.sort,
+        startDate: event.startDate,
+        endDate: event.endDate,
+      ));
     } catch (e) {
       emit(FetchFailure(e.toString()));
     }
