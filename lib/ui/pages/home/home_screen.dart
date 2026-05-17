@@ -20,6 +20,9 @@ class HomeScreen extends StatefulWidget {
 class HomeState extends State<HomeScreen> {
   late Future<Map<String, String?>> _userFuture;
   late Future<bool> _isLoggedIn;
+  String? _selectedSort;
+  DateTime? _startDate;
+  DateTime? _endDate;
 
   @override
   void initState() {
@@ -29,6 +32,56 @@ class HomeState extends State<HomeScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<PaperBloc>().add(const GetAllPapers());
     });
+  }
+
+  Future<void> _selectDateRange() async {
+    final picked = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(2020),
+      lastDate: DateTime.now(),
+      initialDateRange: _startDate != null && _endDate != null
+          ? DateTimeRange(start: _startDate!, end: _endDate!)
+          : null,
+    );
+
+    if (picked != null) {
+      setState(() {
+        _startDate = picked.start;
+        _endDate = picked.end;
+        _selectedSort = null;
+      });
+
+      if (mounted) {
+        context.read<PaperBloc>().add(
+          GetPapersByDateRange(
+            startDate: picked.start,
+            endDate: picked.end,
+          ),
+        );
+      }
+    }
+  }
+
+  void _applySortFilter(String sort) {
+    setState(() {
+      _selectedSort = sort;
+      _startDate = null; // Reset date filter when using sort
+      _endDate = null;
+    });
+
+    context.read<PaperBloc>().add(
+      GetPapersSortedBy(sort: sort, limit: 50),
+    );
+  }
+
+  void _clearFilters() {
+    setState(() {
+      _selectedSort = null;
+      _startDate = null;
+      _endDate = null;
+    });
+
+    context.read<PaperBloc>().add(const GetAllPapers());
   }
 
   @override
@@ -178,18 +231,62 @@ class HomeState extends State<HomeScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Padding(
-                    padding: EdgeInsets.fromLTRB(18, 20, 18, 12),
-                    child: Text(
-                      "Karya Ilmiah Untuk Anda",
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'Poppins',
-                        color: Color(0xFF3674B5),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(18, 20, 18, 12),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          "Karya Ilmiah Untuk Anda",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'Poppins',
+                            color: Color(0xFF3674B5),
+                          ),
+                        ),
+                        if (_selectedSort != null || _startDate != null)
+                          GestureDetector(
+                            onTap: _clearFilters,
+                            child: const Icon(
+                              Icons.clear,
+                              size: 20,
+                              color: Color(0xFF3674B5),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: [
+                          _FilterButton(
+                            label: 'Terbaru',
+                            isActive: _selectedSort == 'newest',
+                            onTap: () => _applySortFilter('newest'),
+                          ),
+                          const SizedBox(width: 8),
+                          _FilterButton(
+                            label: 'Terlama',
+                            isActive: _selectedSort == 'oldest',
+                            onTap: () => _applySortFilter('oldest'),
+                          ),
+                          const SizedBox(width: 8),
+                          _FilterButton(
+                            label: _startDate != null && _endDate != null
+                                ? '📅 ${_startDate!.day}/${_startDate!.month} - ${_endDate!.day}/${_endDate!.month}'
+                                : 'Rentang Tanggal',
+                            isActive: _startDate != null,
+                            onTap: _selectDateRange,
+                          ),
+                        ],
                       ),
                     ),
                   ),
+                  const SizedBox(height: 12),
                   Expanded(
                     child: FutureBuilder<bool>(
                       future: _isLoggedIn,
@@ -225,34 +322,10 @@ class HomeState extends State<HomeScreen> {
                                     const SizedBox(height: 10),
                                 itemBuilder: (ctx, index) {
                                   final item = papers[index];
-                                  return GestureDetector(
-                                    onTap: () {
-                                      if (isLoggedIn) {
-                                        if (item.id != 0) {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) =>
-                                                  DetailPaperScreen(
-                                                    id: item.id,
-                                                  ),
-                                            ),
-                                          );
-                                        }
-                                      } else {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) =>
-                                                const LoginPageScreen(),
-                                          ),
-                                        );
-                                      }
-                                    },
-                                    child: CustomListTile(
-                                      title: item.category,
-                                      subTitle: item.title,
-                                      description: item.abstract,
+                                  return RepaintBoundary(
+                                    child: _PaperTile(
+                                      item: item,
+                                      isLoggedIn: isLoggedIn,
                                     ),
                                   );
                                 },
@@ -273,6 +346,86 @@ class HomeState extends State<HomeScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _FilterButton extends StatelessWidget {
+  final String label;
+  final bool isActive;
+  final VoidCallback onTap;
+
+  const _FilterButton({
+    required this.label,
+    required this.isActive,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: isActive ? const Color(0xFF3674B5) : Colors.grey.shade100,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isActive
+                ? const Color(0xFF3674B5)
+                : Colors.grey.shade300,
+            width: 1,
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
+            color: isActive ? Colors.white : Colors.black87,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _PaperTile extends StatelessWidget {
+  final dynamic item;
+  final bool isLoggedIn;
+
+  const _PaperTile({
+    required this.item,
+    required this.isLoggedIn,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        if (isLoggedIn) {
+          if (item.id != 0) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => DetailPaperScreen(id: item.id),
+              ),
+            );
+          }
+        } else {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const LoginPageScreen(),
+            ),
+          );
+        }
+      },
+      child: CustomListTile(
+        title: item.category,
+        subTitle: item.title,
+        description: item.abstract,
       ),
     );
   }
