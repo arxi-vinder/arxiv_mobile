@@ -69,4 +69,58 @@ class RecommApi {
     throw Exception('Terjadi kesalahan: $e');
   }
 }
+
+  Future<List<PaperRecommendationResponse>> refreshUCBScores(
+    int paperId,
+    int topN,
+  ) async {
+    final token = await SecureStorageService.getAccessToken();
+    final url = Uri.parse("$baseurl/api/v1/recommend/$paperId/refresh-ucb?top_n=$topN");
+
+    try {
+      final response = await http
+          .post(
+            url,
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+              'Authorization': 'Bearer $token',
+            },
+          )
+          .timeout(
+            const Duration(seconds: 10),
+            onTimeout: () {
+              debugPrint('ERROR: Request timeout');
+              throw Exception('Request timeout');
+            },
+          );
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> datas = jsonDecode(response.body);
+
+        final List<dynamic> items =
+            datas['data']?['recommendations']?['data'] ?? [];
+
+        debugPrint("Refreshed UCB Items: $items");
+
+        return items
+            .map((item) => PaperRecommendationResponse.fromJson(item))
+            .toList()
+          ..sort((a, b) => b.ucbScore.compareTo(a.ucbScore));
+      } else if (response.statusCode == 401) {
+        debugPrint('ERROR: Unauthorized (401)');
+        throw UnauthorizedException('Sesi Anda telah habis');
+      } else {
+        debugPrint('ERROR: Status code ${response.statusCode}');
+        throw Exception(
+          'Gagal merefresh UCB scores: ${response.statusCode}',
+        );
+      }
+    } on UnauthorizedException {
+      rethrow;
+    } catch (e) {
+      debugPrint('Error: $e');
+      throw Exception('Terjadi kesalahan: $e');
+    }
+  }
 }
