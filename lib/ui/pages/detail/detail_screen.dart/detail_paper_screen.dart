@@ -8,6 +8,7 @@ import 'package:arxivinder/blocs/papers/recommendation/recommender_bloc.dart';
 import 'package:arxivinder/blocs/papers/recommendation/recommender_event_bloc.dart';
 import 'package:arxivinder/blocs/papers/recommendation/state_recommender_bloc.dart';
 import 'package:arxivinder/data/model/feedback_request.dart';
+import 'package:arxivinder/ui/pages/auth/login/login_page_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -25,6 +26,8 @@ class DetailPaperScreen extends StatefulWidget {
 }
 
 class DetailPaperState extends State<DetailPaperScreen> {
+  bool _unauthorizedDialogShown = false;
+
   @override
   void initState() {
     super.initState();
@@ -32,6 +35,73 @@ class DetailPaperState extends State<DetailPaperScreen> {
       context.read<DetailPaperBloc>().add(GetDetailPaper(widget.id));
       context.read<RecommenderBloc>().add(GetRecommendation(widget.id));
     });
+  }
+
+  Future<void> _showSessionExpiredDialog(String message) async {
+    if (_unauthorizedDialogShown) return;
+    _unauthorizedDialogShown = true;
+
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          title: Row(
+            children: const [
+              Icon(Icons.lock_outline, color: _primaryBlue),
+              SizedBox(width: 8),
+              Text(
+                "Sesi Berakhir",
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  color: _primaryBlue,
+                ),
+              ),
+            ],
+          ),
+          content: Text(
+            "$message. Silakan login kembali untuk melihat rekomendasi.",
+            style: const TextStyle(fontSize: 14, height: 1.4),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: const Text(
+                "Nanti",
+                style: TextStyle(color: Colors.black54),
+              ),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: _primaryBlue,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(
+                    builder: (_) => const LoginPageScreen(),
+                  ),
+                  (route) => false,
+                );
+              },
+              child: const Text("Login"),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (mounted) {
+      _unauthorizedDialogShown = false;
+    }
   }
 
   Future<void> _openPaperUrl(String url) async {
@@ -66,6 +136,13 @@ class DetailPaperState extends State<DetailPaperScreen> {
               ScaffoldMessenger.of(
                 context,
               ).showSnackBar(SnackBar(content: Text(state.error)));
+            }
+          },
+        ),
+        BlocListener<RecommenderBloc, StateRecommenderBloc>(
+          listener: (context, state) {
+            if (state is InitialUnauthorized) {
+              _showSessionExpiredDialog(state.message);
             }
           },
         ),
@@ -390,6 +467,71 @@ class DetailPaperState extends State<DetailPaperScreen> {
                 return SizedBox(
                   height: 100,
                   child: Center(child: Text(recommState.error)),
+                );
+              }
+
+              if (recommState is InitialUnauthorized) {
+                return Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: _primaryBlue.withValues(alpha: 0.06),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: const [
+                          Icon(
+                            Icons.lock_outline,
+                            size: 18,
+                            color: _primaryBlue,
+                          ),
+                          SizedBox(width: 6),
+                          Text(
+                            "Sesi telah habis",
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                              color: _primaryBlue,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        "${recommState.message}. Silakan login kembali untuk melihat rekomendasi.",
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: TextButton.icon(
+                          onPressed: () {
+                            Navigator.of(context).pushAndRemoveUntil(
+                              MaterialPageRoute(
+                                builder: (_) => const LoginPageScreen(),
+                              ),
+                              (route) => false,
+                            );
+                          },
+                          icon: const Icon(
+                            Icons.login,
+                            size: 16,
+                            color: _primaryBlue,
+                          ),
+                          label: const Text(
+                            "Login sekarang",
+                            style: TextStyle(color: _primaryBlue),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 );
               }
 
