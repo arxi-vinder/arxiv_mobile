@@ -36,23 +36,23 @@ class DetailPaperState extends State<DetailPaperScreen> {
 
   Future<void> _openPaperUrl(String url) async {
     if (url.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("URL paper tidak tersedia")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("URL paper tidak tersedia")));
       return;
     }
     final uri = Uri.tryParse(url);
     if (uri == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("URL paper tidak valid")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("URL paper tidak valid")));
       return;
     }
     final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
     if (!launched && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Tidak dapat membuka URL")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Tidak dapat membuka URL")));
     }
   }
 
@@ -223,10 +223,7 @@ class DetailPaperState extends State<DetailPaperScreen> {
           if (category.isNotEmpty) ...[
             const SizedBox(height: 12),
             Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 10,
-                vertical: 5,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
               decoration: BoxDecoration(
                 color: _primaryBlue.withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(6),
@@ -245,11 +242,7 @@ class DetailPaperState extends State<DetailPaperScreen> {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Icon(
-                Icons.person_outline,
-                size: 16,
-                color: Colors.black54,
-              ),
+              const Icon(Icons.person_outline, size: 16, color: Colors.black54),
               const SizedBox(width: 6),
               Expanded(
                 child: Text(
@@ -275,13 +268,10 @@ class DetailPaperState extends State<DetailPaperScreen> {
         width: double.infinity,
         child: ElevatedButton.icon(
           onPressed: () => _openPaperUrl(url),
-          icon: const Icon(Icons.open_in_new, size: 18),
+          icon: const Icon(Icons.open_in_new, size: 18, color: Colors.white),
           label: const Text(
             "Learn more",
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-            ),
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
           ),
           style: ElevatedButton.styleFrom(
             backgroundColor: _primaryBlue,
@@ -419,6 +409,7 @@ class DetailPaperState extends State<DetailPaperScreen> {
                   height: 210,
                   child: ListView.builder(
                     scrollDirection: Axis.horizontal,
+                    addRepaintBoundaries: true,
                     itemCount: recommState.papers.length,
                     itemBuilder: (context, index) {
                       final recommendation = recommState.papers[index];
