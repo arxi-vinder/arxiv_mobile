@@ -427,9 +427,14 @@ class DetailPaperState extends State<DetailPaperScreen> {
                   return InkWell(
                     borderRadius: BorderRadius.circular(6),
                     onTap: hasFeedback
-                        ? () => context
-                            .read<FeedbackPaperBloc>()
-                            .add(const FeedbackReset())
+                        ? () {
+                            context
+                                .read<FeedbackPaperBloc>()
+                                .add(const FeedbackReset());
+                            context
+                                .read<RecommenderBloc>()
+                                .add(RefreshUCBScores(paperId: widget.id));
+                          }
                         : null,
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
