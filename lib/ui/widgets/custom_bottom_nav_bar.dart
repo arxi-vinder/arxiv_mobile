@@ -18,10 +18,7 @@ class CustomBottomNavBar extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         border: Border(
-          top: BorderSide(
-            color: Colors.grey.withOpacity(0.1),
-            width: 1,
-          ),
+          top: BorderSide(color: Colors.grey.withOpacity(0.1), width: 1),
         ),
       ),
       child: SafeArea(
@@ -37,8 +34,8 @@ class CustomBottomNavBar extends StatelessWidget {
                 onTap: () => onTap(0),
               ),
               _NavBarItem(
-                icon: Icons.lightbulb_outline_rounded,
-                label: 'Rekomendasi',
+                icon: Icons.category,
+                label: 'Kategori',
                 isActive: currentIndex == 1,
                 onTap: () => onTap(1),
               ),
@@ -75,9 +72,10 @@ class _NavBarItem extends StatelessWidget {
           vertical: 8,
         ),
         decoration: BoxDecoration(
-          color: isActive
-              ? _primaryBlue.withValues(alpha: 0.08)
-              : Colors.transparent,
+          color:
+              isActive
+                  ? _primaryBlue.withValues(alpha: 0.08)
+                  : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Column(
