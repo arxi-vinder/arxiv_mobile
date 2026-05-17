@@ -20,6 +20,9 @@ class RecommenderBloc extends Bloc<RecommenderEventBloc, StateRecommenderBloc> {
     try {
       final res = await api.getPaperRecommendations(event.id);
       emit(InitialSuccess(res));
+    } on UnauthorizedException catch (e) {
+      debugPrint('Unauthorized fetching recomm: $e');
+      emit(InitialUnauthorized(e.message));
     } catch (e) {
       debugPrint('Error fetching recomm: $e');
       emit(InitialFailure(e.toString()));

@@ -27,3 +27,12 @@ class InitialFailure extends StateRecommenderBloc {
   @override
   List<Object?> get props => [error];
 }
+
+class InitialUnauthorized extends StateRecommenderBloc {
+  final String message;
+
+  InitialUnauthorized([this.message = 'Sesi Anda telah habis']);
+
+  @override
+  List<Object?> get props => [message];
+}
