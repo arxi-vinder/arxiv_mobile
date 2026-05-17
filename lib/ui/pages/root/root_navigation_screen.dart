@@ -2,6 +2,7 @@ import 'package:arxivinder/blocs/bottom_nav_bar_bloc.dart';
 import 'package:arxivinder/data/events/bottom_navigation_event.dart';
 import 'package:arxivinder/ui/pages/home/home_screen.dart';
 import 'package:arxivinder/ui/pages/recommendation/recommender_screen.dart';
+import 'package:arxivinder/ui/widgets/custom_bottom_nav_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -32,23 +33,13 @@ class RootNavigationState extends State<RootNavigationScreen> {
       ),
       bottomNavigationBar: BlocBuilder<BottomNavBarBloc, int>(
         builder: (context, index) {
-          return BottomNavigationBar(
+          return CustomBottomNavBar(
             currentIndex: index,
             onTap: (selectedIndex) {
               context.read<BottomNavBarBloc>().add(
                 BottomNavigationEvent.values[selectedIndex],
               );
             },
-            items: const [
-              BottomNavigationBarItem(
-                icon: Icon(Icons.home), 
-                label: 'Home'
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.search),
-                label: 'Recommender',
-              ),
-            ],
           );
         },
       ),
