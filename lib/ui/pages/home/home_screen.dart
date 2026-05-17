@@ -88,7 +88,7 @@ class HomeState extends State<HomeScreen> {
           // Background Biru di Atas
           Container(
             width: screenWidth,
-            height: 180, 
+            height: 180,
             decoration: const ShapeDecoration(
               color: Color(0xFF3674B5),
               shape: RoundedRectangleBorder(
@@ -152,12 +152,11 @@ class HomeState extends State<HomeScreen> {
             ),
           ),
           Padding(
-        
             padding: const EdgeInsets.only(
-              top: 150,
-              left: 17,
-              right: 17,
-              bottom: 10,
+              top: 130,
+              left: 16,
+              right: 16,
+              bottom: 20,
             ),
             child: Container(
               width: double.infinity,
@@ -180,13 +179,14 @@ class HomeState extends State<HomeScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Padding(
-                    padding: EdgeInsets.all(16.0),
+                    padding: EdgeInsets.fromLTRB(18, 20, 18, 12),
                     child: Text(
-                      "Rekomendasi Untuk Anda",
+                      "Karya Ilmiah Untuk Anda",
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                         fontFamily: 'Poppins',
+                        color: Color(0xFF3674B5),
                       ),
                     ),
                   ),
@@ -215,11 +215,14 @@ class HomeState extends State<HomeScreen> {
                                   child: Text('Tidak ada paper tersedia'),
                                 );
                               }
-                              return ListView.builder(
-                                padding: const EdgeInsets.only(
-                                  bottom: 20,
-                                ), 
+                              return ListView.separated(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 8,
+                                ),
                                 itemCount: papers.length,
+                                separatorBuilder: (_, __) =>
+                                    const SizedBox(height: 10),
                                 itemBuilder: (ctx, index) {
                                   final item = papers[index];
                                   return GestureDetector(
@@ -229,11 +232,10 @@ class HomeState extends State<HomeScreen> {
                                           Navigator.push(
                                             context,
                                             MaterialPageRoute(
-                                              builder:
-                                                  (context) =>
-                                                      DetailPaperScreen(
-                                                        id: item.id,
-                                                      ),
+                                              builder: (context) =>
+                                                  DetailPaperScreen(
+                                                    id: item.id,
+                                                  ),
                                             ),
                                           );
                                         }
@@ -241,9 +243,8 @@ class HomeState extends State<HomeScreen> {
                                         Navigator.push(
                                           context,
                                           MaterialPageRoute(
-                                            builder:
-                                                (context) =>
-                                                    const LoginPageScreen(),
+                                            builder: (context) =>
+                                                const LoginPageScreen(),
                                           ),
                                         );
                                       }
