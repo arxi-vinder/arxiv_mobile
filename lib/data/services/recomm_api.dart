@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:arxivinder/data/model/paper_recommendation_response.dart';
+import 'package:arxivinder/data/services/secure_storage_service.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
@@ -11,11 +12,19 @@ class RecommApi {
   Future<List<PaperRecommendationResponse>> getPaperRecommendations(
   int id,
 ) async {
+  final token = await SecureStorageService.getAccessToken();
   final url = Uri.parse("$baseurl/api/v1/recommend/$id");
 
   try {
     final response = await http
-        .get(url)
+        .get(
+          url,
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'Authorization': 'Bearer $token',
+        },
+        )
         .timeout(
           const Duration(seconds: 10),
           onTimeout: () {
