@@ -423,8 +423,8 @@ class _PaperTile extends StatelessWidget {
         }
       },
       child: CustomListTile(
-        title: item.category,
-        subTitle: item.title,
+        title: item.title,
+        subTitle: item.category,
         description: item.abstract,
       ),
     );
