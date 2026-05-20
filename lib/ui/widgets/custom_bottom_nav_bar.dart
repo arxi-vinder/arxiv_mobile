@@ -29,13 +29,13 @@ class CustomBottomNavBar extends StatelessWidget {
             children: [
               _NavBarItem(
                 icon: Icons.home_rounded,
-                label: 'Beranda',
+                label: 'Home',
                 isActive: currentIndex == 0,
                 onTap: () => onTap(0),
               ),
               _NavBarItem(
                 icon: Icons.category,
-                label: 'Kategori',
+                label: 'Category',
                 isActive: currentIndex == 1,
                 onTap: () => onTap(1),
               ),

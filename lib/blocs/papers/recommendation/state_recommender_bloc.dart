@@ -31,7 +31,7 @@ class InitialFailure extends StateRecommenderBloc {
 class InitialUnauthorized extends StateRecommenderBloc {
   final String message;
 
-  InitialUnauthorized([this.message = 'Sesi Anda telah habis']);
+  InitialUnauthorized([this.message = 'Your session has expired']);
 
   @override
   List<Object?> get props => [message];

@@ -32,18 +32,18 @@ class FeedbackApi {
         try {
           final Map<String, dynamic> errorData = jsonDecode(response.body);
           throw Exception(
-            'Gagal melakukan update ucb - Status ${response.statusCode}: ${errorData['message'] ?? response.body}',
+            'Failed to update UCB - Status ${response.statusCode}: ${errorData['message'] ?? response.body}',
           );
         } catch (parseError) {
           throw Exception(
-            'Gagal melakukan update ucb - Status ${response.statusCode}: ${response.body}',
+            'Failed to update UCB - Status ${response.statusCode}: ${response.body}',
           );
         }
       }
     } on Exception {
       rethrow;
     } catch (e) {
-      throw Exception('Terjadi kesalahan: $e');
+      throw Exception('An error occurred: $e');
     }
   }
 }

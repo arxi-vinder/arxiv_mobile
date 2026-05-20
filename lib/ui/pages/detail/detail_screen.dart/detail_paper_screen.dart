@@ -54,7 +54,7 @@ class DetailPaperState extends State<DetailPaperScreen> {
               Icon(Icons.lock_outline, color: _primaryBlue),
               SizedBox(width: 8),
               Text(
-                "Sesi Berakhir",
+                "Session Expired",
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
@@ -64,14 +64,14 @@ class DetailPaperState extends State<DetailPaperScreen> {
             ],
           ),
           content: Text(
-            "$message. Silakan login kembali untuk melihat rekomendasi.",
+            "$message. Please login again to see recommendations.",
             style: const TextStyle(fontSize: 14, height: 1.4),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(),
               child: const Text(
-                "Nanti",
+                "Later",
                 style: TextStyle(color: Colors.black54),
               ),
             ),
@@ -86,9 +86,7 @@ class DetailPaperState extends State<DetailPaperScreen> {
               onPressed: () {
                 Navigator.of(dialogContext).pop();
                 Navigator.of(context).pushAndRemoveUntil(
-                  MaterialPageRoute(
-                    builder: (_) => const LoginPageScreen(),
-                  ),
+                  MaterialPageRoute(builder: (_) => const LoginPageScreen()),
                   (route) => false,
                 );
               },
@@ -108,21 +106,21 @@ class DetailPaperState extends State<DetailPaperScreen> {
     if (url.isEmpty) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text("URL paper tidak tersedia")));
+      ).showSnackBar(const SnackBar(content: Text("Paper URL not available")));
       return;
     }
     final uri = Uri.tryParse(url);
     if (uri == null) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text("URL paper tidak valid")));
+      ).showSnackBar(const SnackBar(content: Text("Paper URL is invalid")));
       return;
     }
     final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
     if (!launched && mounted) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text("Tidak dapat membuka URL")));
+      ).showSnackBar(const SnackBar(content: Text("Cannot open URL")));
     }
   }
 
@@ -211,7 +209,7 @@ class DetailPaperState extends State<DetailPaperScreen> {
             ),
             const SizedBox(height: 24),
             const Text(
-              "Menyiapkan rekomendasi untuk Anda",
+              "Prepare Recommendations for you...",
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 15,
@@ -266,7 +264,7 @@ class DetailPaperState extends State<DetailPaperScreen> {
               ),
             ),
             const Text(
-              "Detail Karya Ilmiah",
+              "Scientific Paper Details",
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 22,
@@ -323,7 +321,7 @@ class DetailPaperState extends State<DetailPaperScreen> {
               const SizedBox(width: 6),
               Expanded(
                 child: Text(
-                  author.isEmpty ? "Tidak diketahui" : author,
+                  author.isEmpty ? "Unknown" : author,
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
@@ -409,7 +407,7 @@ class DetailPaperState extends State<DetailPaperScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text(
-                "Lebih banyak untuk Anda",
+                "More For You",
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
@@ -419,23 +417,22 @@ class DetailPaperState extends State<DetailPaperScreen> {
               ),
               BlocBuilder<FeedbackPaperBloc, StateFeedbackPaperBloc>(
                 builder: (context, feedbackState) {
-                  final hasFeedback = context
-                      .read<FeedbackPaperBloc>()
-                      .feedbackMap
-                      .isNotEmpty;
+                  final hasFeedback =
+                      context.read<FeedbackPaperBloc>().feedbackMap.isNotEmpty;
                   final color = hasFeedback ? _primaryBlue : Colors.black38;
                   return InkWell(
                     borderRadius: BorderRadius.circular(6),
-                    onTap: hasFeedback
-                        ? () {
-                            context
-                                .read<FeedbackPaperBloc>()
-                                .add(const FeedbackReset());
-                            context
-                                .read<RecommenderBloc>()
-                                .add(RefreshUCBScores(paperId: widget.id));
-                          }
-                        : null,
+                    onTap:
+                        hasFeedback
+                            ? () {
+                              context.read<FeedbackPaperBloc>().add(
+                                const FeedbackReset(),
+                              );
+                              context.read<RecommenderBloc>().add(
+                                RefreshUCBScores(paperId: widget.id),
+                              );
+                            }
+                            : null,
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 6,
@@ -495,7 +492,7 @@ class DetailPaperState extends State<DetailPaperScreen> {
                           ),
                           SizedBox(width: 6),
                           Text(
-                            "Sesi telah habis",
+                            "Session has expired",
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w700,
@@ -506,7 +503,7 @@ class DetailPaperState extends State<DetailPaperScreen> {
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        "${recommState.message}. Silakan login kembali untuk melihat rekomendasi.",
+                        "${recommState.message}. Please login again to see recommendations.",
                         style: const TextStyle(
                           fontSize: 13,
                           color: Colors.black87,
@@ -530,7 +527,7 @@ class DetailPaperState extends State<DetailPaperScreen> {
                             color: _primaryBlue,
                           ),
                           label: const Text(
-                            "Login sekarang",
+                            "Login now",
                             style: TextStyle(color: _primaryBlue),
                           ),
                         ),
@@ -546,7 +543,7 @@ class DetailPaperState extends State<DetailPaperScreen> {
                     height: 80,
                     child: Center(
                       child: Text(
-                        "Belum ada rekomendasi",
+                        "No recommendations yet",
                         style: TextStyle(color: Colors.black54),
                       ),
                     ),
@@ -568,9 +565,9 @@ class DetailPaperState extends State<DetailPaperScreen> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (_) => DetailPaperScreen(
-                                id: recommendation.id,
-                              ),
+                              builder:
+                                  (_) =>
+                                      DetailPaperScreen(id: recommendation.id),
                             ),
                           );
                         },
@@ -670,9 +667,10 @@ class _RecommendationCard extends StatelessWidget {
                     ),
                     BlocBuilder<FeedbackPaperBloc, StateFeedbackPaperBloc>(
                       builder: (context, feedbackState) {
-                        final feedbackValue = context
-                            .read<FeedbackPaperBloc>()
-                            .feedbackMap[paperId];
+                        final feedbackValue =
+                            context
+                                .read<FeedbackPaperBloc>()
+                                .feedbackMap[paperId];
                         final isLiked = feedbackValue == 1;
                         final isDisliked = feedbackValue == 0;
 
@@ -695,8 +693,7 @@ class _RecommendationCard extends StatelessWidget {
                                     ? Icons.thumb_up
                                     : Icons.thumb_up_outlined,
                                 size: 14,
-                                color:
-                                    isLiked ? Colors.blue : Colors.grey,
+                                color: isLiked ? Colors.blue : Colors.grey,
                               ),
                             ),
                             const SizedBox(width: 8),
@@ -716,8 +713,7 @@ class _RecommendationCard extends StatelessWidget {
                                     ? Icons.thumb_down
                                     : Icons.thumb_down_outlined,
                                 size: 14,
-                                color:
-                                    isDisliked ? Colors.red : Colors.grey,
+                                color: isDisliked ? Colors.red : Colors.grey,
                               ),
                             ),
                           ],

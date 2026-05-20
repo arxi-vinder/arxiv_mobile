@@ -1,6 +1,8 @@
 import 'package:arxivinder/blocs/papers/category/category_bloc.dart';
 import 'package:arxivinder/blocs/papers/category/category_event.dart';
 import 'package:arxivinder/blocs/papers/category/category_state.dart';
+import 'package:arxivinder/data/services/secure_storage_service.dart';
+import 'package:arxivinder/ui/pages/auth/login/login_page_screen.dart';
 import 'package:arxivinder/ui/pages/detail/detail_screen.dart/detail_paper_screen.dart';
 import 'package:arxivinder/ui/utils/custom_list_tile.dart';
 import 'package:flutter/material.dart';
@@ -50,15 +52,14 @@ class _RecommenderScreenState extends State<RecommenderScreen> {
                   const SizedBox(height: 24),
                   if (state.selectedCategory != null)
                     _buildPapersSection(state),
-                  if (state.selectedCategory == null)
-                    _buildEmptyState(),
+                  if (state.selectedCategory == null) _buildEmptyState(),
                   const SizedBox(height: 20),
                 ],
               ),
             );
           }
 
-          return const Center(child: Text("Tidak ada data"));
+          return const Center(child: Text("No data"));
         },
       ),
     );
@@ -70,7 +71,7 @@ class _RecommenderScreenState extends State<RecommenderScreen> {
       elevation: 0,
       centerTitle: true,
       title: const Text(
-        "Jelajahi Kategori",
+        "Explore Categories",
         style: TextStyle(
           color: Colors.white,
           fontSize: 20,
@@ -82,9 +83,7 @@ class _RecommenderScreenState extends State<RecommenderScreen> {
   }
 
   Widget _buildLoadingState() {
-    return const Center(
-      child: CircularProgressIndicator(color: _primaryBlue),
-    );
+    return const Center(child: CircularProgressIndicator(color: _primaryBlue));
   }
 
   Widget _buildErrorState(String message) {
@@ -94,18 +93,11 @@ class _RecommenderScreenState extends State<RecommenderScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
-              Icons.error_outline,
-              size: 64,
-              color: Colors.red,
-            ),
+            const Icon(Icons.error_outline, size: 64, color: Colors.red),
             const SizedBox(height: 16),
             Text(
               "Error",
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Text(
@@ -124,14 +116,10 @@ class _RecommenderScreenState extends State<RecommenderScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 60),
       child: Column(
         children: [
-          Icon(
-            Icons.category_outlined,
-            size: 80,
-            color: Colors.grey.shade300,
-          ),
+          Icon(Icons.category_outlined, size: 80, color: Colors.grey.shade300),
           const SizedBox(height: 24),
           Text(
-            "Pilih Kategori",
+            "Select Category",
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w600,
@@ -140,15 +128,43 @@ class _RecommenderScreenState extends State<RecommenderScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            "Tekan salah satu kategori di atas untuk melihat paper yang tersedia",
+            "Tap one of the categories above to see available papers",
             textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey.shade500,
-            ),
+            style: TextStyle(fontSize: 14, color: Colors.grey.shade500),
           ),
         ],
       ),
+    );
+  }
+
+  void _showLoginDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: const Text("Login Required"),
+          content: const Text("You must login first to access papers."),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(dialogContext);
+              },
+              child: const Text("Later"),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(dialogContext);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const LoginPageScreen()),
+                );
+              },
+              style: ElevatedButton.styleFrom(backgroundColor: _primaryBlue),
+              child: const Text("Login", style: TextStyle(color: Colors.white)),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -159,7 +175,7 @@ class _RecommenderScreenState extends State<RecommenderScreen> {
         const Padding(
           padding: EdgeInsets.symmetric(horizontal: 16),
           child: Text(
-            "Kategori",
+            "Categories",
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w700,
@@ -183,10 +199,17 @@ class _RecommenderScreenState extends State<RecommenderScreen> {
                 child: _CategoryChip(
                   label: category.name,
                   isSelected: isSelected,
-                  onTap: () {
-                    context
-                        .read<CategoryBloc>()
-                        .add(FetchPapersByCategory(category.name));
+                  onTap: () async {
+                    final isLoggedIn = await SecureStorageService.isLoggedIn();
+                    if (!context.mounted) return;
+
+                    if (isLoggedIn) {
+                      context.read<CategoryBloc>().add(
+                        FetchPapersByCategory(category.name),
+                      );
+                    } else {
+                      _showLoginDialog(context);
+                    }
                   },
                 ),
               );
@@ -201,9 +224,7 @@ class _RecommenderScreenState extends State<RecommenderScreen> {
     if (state.isLoadingPapers) {
       return const Padding(
         padding: EdgeInsets.symmetric(vertical: 24),
-        child: Center(
-          child: CircularProgressIndicator(color: _primaryBlue),
-        ),
+        child: Center(child: CircularProgressIndicator(color: _primaryBlue)),
       );
     }
 
@@ -212,7 +233,7 @@ class _RecommenderScreenState extends State<RecommenderScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 32),
         child: Center(
           child: Text(
-            "Tidak ada paper untuk kategori ini",
+            "No papers for this category",
             style: TextStyle(color: Colors.grey.shade600),
           ),
         ),
@@ -228,7 +249,7 @@ class _RecommenderScreenState extends State<RecommenderScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                "Paper (${state.papers!.length})",
+                "Papers (${state.papers!.length})",
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,

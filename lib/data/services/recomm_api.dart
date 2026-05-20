@@ -18,64 +18,66 @@ class RecommApi {
   final String? baseurl = dotenv.env['BASEURL'];
 
   Future<List<PaperRecommendationResponse>> getPaperRecommendations(
-  int id,
-) async {
-  final token = await SecureStorageService.getAccessToken();
-  final url = Uri.parse("$baseurl/api/v1/recommend/$id");
+    int id,
+  ) async {
+    final token = await SecureStorageService.getAccessToken();
+    final url = Uri.parse("$baseurl/api/v1/recommend/$id");
 
-  try {
-    final response = await http
-        .get(
-          url,
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'Authorization': 'Bearer $token',
-        },
-        )
-        .timeout(
-          const Duration(seconds: 10),
-          onTimeout: () {
-            debugPrint('ERROR: Request timeout');
-            throw Exception('Request timeout');
-          },
+    try {
+      final response = await http
+          .get(
+            url,
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+              'Authorization': 'Bearer $token',
+            },
+          )
+          .timeout(
+            const Duration(seconds: 10),
+            onTimeout: () {
+              debugPrint('ERROR: Request timeout');
+              throw Exception('Request timeout');
+            },
+          );
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> datas = jsonDecode(response.body);
+
+        final List<dynamic> items =
+            datas['data']?['recommendations']?['data'] ?? [];
+
+        debugPrint("Items: $items");
+
+        return items
+            .map((item) => PaperRecommendationResponse.fromJson(item))
+            .toList()
+          ..sort((a, b) => b.ucbScore.compareTo(a.ucbScore));
+      } else if (response.statusCode == 401) {
+        debugPrint('ERROR: Unauthorized (401)');
+        throw UnauthorizedException('Your session has expired');
+      } else {
+        debugPrint('ERROR: Status code ${response.statusCode}');
+        throw Exception(
+          'Failed to fetch recommendations: ${response.statusCode}',
         );
-
-    if (response.statusCode == 200) {
-      final Map<String, dynamic> datas = jsonDecode(response.body);
-
-      final List<dynamic> items =
-          datas['data']?['recommendations']?['data'] ?? [];
-
-      debugPrint("Items: $items");
-
-      return items
-          .map((item) => PaperRecommendationResponse.fromJson(item))
-          .toList()
-        ..sort((a, b) => b.ucbScore.compareTo(a.ucbScore));
-    } else if (response.statusCode == 401) {
-      debugPrint('ERROR: Unauthorized (401)');
-      throw UnauthorizedException('Sesi Anda telah habis');
-    } else {
-      debugPrint('ERROR: Status code ${response.statusCode}');
-      throw Exception(
-        'Gagal mengambil rekomendasi paper: ${response.statusCode}',
-      );
+      }
+    } on UnauthorizedException {
+      rethrow;
+    } catch (e) {
+      debugPrint('Error: $e');
+      throw Exception('An error occurred: $e');
     }
-  } on UnauthorizedException {
-    rethrow;
-  } catch (e) {
-    debugPrint('Error: $e');
-    throw Exception('Terjadi kesalahan: $e');
   }
-}
 
   Future<List<PaperRecommendationResponse>> refreshUCBScores(
     int paperId,
     int topN,
   ) async {
     final token = await SecureStorageService.getAccessToken();
-    final url = Uri.parse("$baseurl/api/v1/recommend/$paperId/refresh-ucb?top_n=$topN");
+    final url = Uri.parse(
+      "$baseurl/api/v1/recommend/$paperId/refresh-ucb?top_n=$topN",
+    );
 
     try {
       final response = await http
@@ -109,18 +111,16 @@ class RecommApi {
           ..sort((a, b) => b.ucbScore.compareTo(a.ucbScore));
       } else if (response.statusCode == 401) {
         debugPrint('ERROR: Unauthorized (401)');
-        throw UnauthorizedException('Sesi Anda telah habis');
+        throw UnauthorizedException('Your session has expired');
       } else {
         debugPrint('ERROR: Status code ${response.statusCode}');
-        throw Exception(
-          'Gagal merefresh UCB scores: ${response.statusCode}',
-        );
+        throw Exception('Failed to refresh UCB scores: ${response.statusCode}');
       }
     } on UnauthorizedException {
       rethrow;
     } catch (e) {
       debugPrint('Error: $e');
-      throw Exception('Terjadi kesalahan: $e');
+      throw Exception('An error occurred: $e');
     }
   }
 }

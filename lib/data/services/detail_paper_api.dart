@@ -13,28 +13,32 @@ class DetailPaperApi {
     debugPrint('URL: $url');
 
     try {
-      final response = await http.get(url).timeout(
-        const Duration(seconds: 10),
-        onTimeout: () {
-          debugPrint('ERROR: Request timeout');
-          throw Exception('Request timeout');
-        },
-      );
+      final response = await http
+          .get(url)
+          .timeout(
+            const Duration(seconds: 10),
+            onTimeout: () {
+              debugPrint('ERROR: Request timeout');
+              throw Exception('Request timeout');
+            },
+          );
 
       debugPrint('Status Code: ${response.statusCode}');
       debugPrint('Response body: ${response.body}');
-      
+
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         debugPrint('Decoded data: $data');
         return PaperDetailResponse.fromJson(data);
       } else {
         debugPrint('ERROR: Status code ${response.statusCode}');
-        throw Exception('Gagal mengambil detail paper: ${response.statusCode}');
+        throw Exception(
+          'Failed to fetch paper details: ${response.statusCode}',
+        );
       }
     } catch (e) {
       debugPrint('Error: $e');
-      throw Exception('Terjadi kesalahan: $e');
+      throw Exception('An error occurred: $e');
     }
   }
 }

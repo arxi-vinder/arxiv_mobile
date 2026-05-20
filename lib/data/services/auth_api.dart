@@ -25,10 +25,10 @@ class AuthApi {
         return AuthResponse.fromJson(data);
       } else {
         final Map<String, dynamic> errorData = jsonDecode(response.body);
-        throw Exception(errorData['message'] ?? 'Gagal melakukan registrasi');
+        throw Exception(errorData['message'] ?? 'Failed to register');
       }
     } catch (e) {
-      throw Exception('Terjadi kesalahan: $e');
+      throw Exception('An error occurred: $e');
     }
   }
 
@@ -50,10 +50,10 @@ class AuthApi {
         return AuthResponse.fromJson(data);
       } else {
         final Map<String, dynamic> errorData = jsonDecode(response.body);
-        throw Exception(errorData['message'] ?? 'Gagal melakukan login');
+        throw Exception(errorData['message'] ?? 'Failed to login');
       }
     } catch (e) {
-      throw Exception('Terjadi kesalahan: $e');
+      throw Exception('An error occurred: $e');
     }
   }
 }

@@ -70,7 +70,7 @@ class RegisterPageState extends State<RegisterPageScreen> {
                       const SizedBox(height: 20),
 
                       const Text(
-                        'Registrasi ke\nakun Anda',
+                        'Sign Up For Your\nAccount',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           color: Colors.white,
@@ -139,12 +139,12 @@ class RegisterPageState extends State<RegisterPageScreen> {
                                 const Text("Username"),
                                 AuthTextField(
                                   controller: _usernameController,
-                                  hintText: "Masukkan username",
+                                  hintText: "Enter username",
                                 ),
 
                                 const SizedBox(height: 20),
                                 const Text(
-                                  "Kata Sandi",
+                                  "Password",
                                   style: TextStyle(color: Colors.black),
                                 ),
 
@@ -152,7 +152,7 @@ class RegisterPageState extends State<RegisterPageScreen> {
 
                                 AuthTextField(
                                   controller: _passwordController,
-                                  hintText: "Masukkan password",
+                                  hintText: "Enter password",
                                   isPassword: true,
                                 ),
 
@@ -161,7 +161,7 @@ class RegisterPageState extends State<RegisterPageScreen> {
                                   const CircularProgressIndicator()
                                 else
                                   AuthButton(
-                                    caption: "Registrasi",
+                                    caption: "Sign Up",
                                     action: () {
                                       final username =
                                           _usernameController.text.trim();

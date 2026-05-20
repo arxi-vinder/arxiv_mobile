@@ -38,7 +38,7 @@ class LoginPageState extends State<LoginPageScreen> {
       create: (context) => LoginAuthBloc(authApi: AuthApi()),
       child: Scaffold(
         body: CustomAuthWidget(
-          title: "Masuk Ke akun anda",
+          title: "Sign In To Your Account",
           logoPath: 'assets/images/arxiv_register_logo.png',
           child: BlocConsumer<LoginAuthBloc, StateLoginAuth>(
             listener: (context, state) {
@@ -71,17 +71,14 @@ class LoginPageState extends State<LoginPageScreen> {
                   const Text("Username"),
                   AuthTextField(
                     controller: _usernameController,
-                    hintText: "Masukkan username",
+                    hintText: "Enter username",
                   ),
                   SizedBox(height: 20),
-                  const Text(
-                    "Kata Sandi",
-                    style: TextStyle(color: Colors.black),
-                  ),
+                  const Text("Password", style: TextStyle(color: Colors.black)),
                   SizedBox(height: 20),
                   AuthTextField(
                     controller: _passwordController,
-                    hintText: "Masukkan password",
+                    hintText: "Enter password",
                     isPassword: true,
                   ),
                   SizedBox(height: 30),
@@ -89,7 +86,7 @@ class LoginPageState extends State<LoginPageScreen> {
                     const CircularProgressIndicator()
                   else
                     AuthButton(
-                      caption: "Masuk",
+                      caption: "Sign In",
                       action: () {
                         final username = _usernameController.text.trim();
                         final password = _passwordController.text.trim();
@@ -129,7 +126,7 @@ class LoginPageState extends State<LoginPageScreen> {
                       const SizedBox(width: 4),
                       GestureDetector(
                         child: Text(
-                          "Registrasi",
+                          "Sign Up",
                           style: TextStyle(
                             fontFamily: "Roboto",
                             fontSize: 12,
