@@ -44,9 +44,10 @@ class FetchSuccess extends PaperStateBloc {
 
 class FetchFailure extends PaperStateBloc {
   final String error;
+  final String? friendlyMessage;
 
-  const FetchFailure(this.error);
+  const FetchFailure(this.error, {this.friendlyMessage});
 
   @override
-  List<Object?> get props => [error];
+  List<Object?> get props => [error, friendlyMessage];
 }

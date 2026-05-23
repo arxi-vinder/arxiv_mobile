@@ -1,6 +1,7 @@
 import 'package:arxivinder/blocs/papers/detail/detail_paper_event.dart';
 import 'package:arxivinder/blocs/papers/detail/state_paper_detail_bloc.dart';
 import 'package:arxivinder/data/services/detail_paper_api.dart';
+import 'package:arxivinder/utils/error_handler.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -24,7 +25,8 @@ class DetailPaperBloc extends Bloc<DetailPaperEvent, StatePaperDetailBloc> {
       emit(PaperDetailLoaded(result));
     } catch (e) {
       debugPrint('Error fetching detail: $e');
-      emit(PaperDetailError(e.toString()));
+      emit(PaperDetailError(e.toString(),
+          friendlyMessage: ErrorHandler.getErrorMessage(e)));
     }
   }
 }

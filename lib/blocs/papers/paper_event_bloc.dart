@@ -40,3 +40,12 @@ class GetPapersByDateRange extends PaperEventBloc {
   @override
   List<Object?> get props => [startDate, endDate, sort, limit];
 }
+
+class SearchPaperByName extends PaperEventBloc {
+  final String name;
+
+  const SearchPaperByName({required this.name});
+
+  @override
+  List<Object?> get props => [name];
+}

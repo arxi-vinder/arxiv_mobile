@@ -23,9 +23,10 @@ class PaperDetailLoaded extends StatePaperDetailBloc {
 
 class PaperDetailError extends StatePaperDetailBloc {
   final String message;
+  final String? friendlyMessage;
 
-  const PaperDetailError(this.message);
+  const PaperDetailError(this.message, {this.friendlyMessage});
 
   @override
-  List<Object?> get props => [message];
+  List<Object?> get props => [message, friendlyMessage];
 }
