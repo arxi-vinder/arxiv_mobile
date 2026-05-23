@@ -50,9 +50,10 @@ class CategoryLoaded extends CategoryState {
 
 class CategoryError extends CategoryState {
   final String message;
+  final String? friendlyMessage;
 
-  const CategoryError(this.message);
+  const CategoryError(this.message, {this.friendlyMessage});
 
   @override
-  List<Object?> get props => [message];
+  List<Object?> get props => [message, friendlyMessage];
 }

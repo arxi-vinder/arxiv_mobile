@@ -1,6 +1,7 @@
 import 'package:arxivinder/blocs/papers/category/category_event.dart';
 import 'package:arxivinder/blocs/papers/category/category_state.dart';
 import 'package:arxivinder/data/services/category_api.dart';
+import 'package:arxivinder/utils/error_handler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
@@ -21,7 +22,8 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
       final categories = await api.getCategories();
       emit(CategoryLoaded(categories: categories));
     } catch (e) {
-      emit(CategoryError(e.toString()));
+      emit(CategoryError(e.toString(),
+          friendlyMessage: ErrorHandler.getErrorMessage(e)));
     }
   }
 
@@ -52,7 +54,8 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
         final currentState = state as CategoryLoaded;
         emit(currentState.copyWith(isLoadingPapers: false));
       }
-      emit(CategoryError(e.toString()));
+      emit(CategoryError(e.toString(),
+          friendlyMessage: ErrorHandler.getErrorMessage(e)));
     }
   }
 }
