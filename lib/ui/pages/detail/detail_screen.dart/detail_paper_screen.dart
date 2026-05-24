@@ -17,7 +17,8 @@ const _primaryBlue = Color.fromARGB(255, 0, 55, 117);
 
 class DetailPaperScreen extends StatefulWidget {
   final int id;
-  const DetailPaperScreen({super.key, required this.id});
+  final int? originId;
+  const DetailPaperScreen({super.key, required this.id, this.originId});
 
   @override
   State<StatefulWidget> createState() {
@@ -31,9 +32,21 @@ class DetailPaperState extends State<DetailPaperScreen> {
   @override
   void initState() {
     super.initState();
+    _loadPaperData(widget.id);
+  }
+
+  @override
+  void didUpdateWidget(DetailPaperScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.id != widget.id) {
+      _loadPaperData(widget.id);
+    }
+  }
+
+  void _loadPaperData(int paperId) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<DetailPaperBloc>().add(GetDetailPaper(widget.id));
-      context.read<RecommenderBloc>().add(GetRecommendation(widget.id));
+      context.read<DetailPaperBloc>().add(GetDetailPaper(paperId));
+      context.read<RecommenderBloc>().add(GetRecommendation(paperId));
     });
   }
 
@@ -126,69 +139,131 @@ class DetailPaperState extends State<DetailPaperScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return MultiBlocListener(
-      listeners: [
-        BlocListener<FeedbackPaperBloc, StateFeedbackPaperBloc>(
-          listener: (context, state) {
-            if (state is FeedbackFailure) {
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(SnackBar(content: Text(state.error)));
-            }
-          },
-        ),
-        BlocListener<RecommenderBloc, StateRecommenderBloc>(
-          listener: (context, state) {
-            if (state is InitialUnauthorized) {
-              _showSessionExpiredDialog(state.message);
-            }
-          },
-        ),
-      ],
-      child: Scaffold(
-        backgroundColor: Colors.white,
-        body: BlocBuilder<DetailPaperBloc, StatePaperDetailBloc>(
-          builder: (context, state) {
-            if (state is PaperDetailLoading) {
-              return _buildLoading();
-            }
+    return PopScope(
+      canPop: true,
+      child: MultiBlocListener(
+        listeners: [
+          BlocListener<FeedbackPaperBloc, StateFeedbackPaperBloc>(
+            listener: (context, state) {
+              if (state is FeedbackFailure) {
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text(state.error)));
+              }
+            },
+          ),
+          BlocListener<RecommenderBloc, StateRecommenderBloc>(
+            listener: (context, state) {
+              if (state is InitialUnauthorized) {
+                _showSessionExpiredDialog(state.message);
+              }
+            },
+          ),
+        ],
+        child: Scaffold(
+          backgroundColor: Colors.white,
+          body: BlocBuilder<DetailPaperBloc, StatePaperDetailBloc>(
+            builder: (context, state) {
+              if (state is PaperDetailLoading) {
+                return _buildLoading();
+              }
 
-            if (state is PaperDetailError) {
-              return Center(child: Text(state.message));
-            }
-
-            if (state is PaperDetailLoaded) {
-              final paper = state.paper;
-
-              return SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildHeader(),
-                    const SizedBox(height: 24),
-                    _buildPaperInfo(
-                      title: paper.title,
-                      author: paper.author,
-                      category: paper.category,
+              if (state is PaperDetailError) {
+                return Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.error_outline,
+                          size: 48,
+                          color: _primaryBlue,
+                        ),
+                        const SizedBox(height: 16),
+                        const Text(
+                          'Gagal Memuat Detail',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: _primaryBlue,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          state.friendlyMessage ??
+                              'Terjadi kesalahan saat memuat detail paper. Silakan coba lagi.',
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: Colors.black87,
+                            height: 1.5,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 24),
+                        ElevatedButton.icon(
+                          onPressed: () {
+                            context.read<DetailPaperBloc>().add(
+                              GetDetailPaper(widget.id),
+                            );
+                          },
+                          icon: const Icon(Icons.refresh),
+                          label: const Text('Coba Lagi'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: _primaryBlue,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 32,
+                              vertical: 12,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 20),
-                    _buildLearnMore(paper.url),
-                    const SizedBox(height: 24),
-                    _buildDivider(),
-                    const SizedBox(height: 20),
-                    _buildAbstractSection(paper.abstract),
-                    const SizedBox(height: 28),
-                    _buildDivider(),
-                    const SizedBox(height: 20),
-                    _buildRecommendationSection(),
-                    const SizedBox(height: 24),
-                  ],
-                ),
-              );
-            }
+                  ),
+                );
+              }
 
-            return const Center(child: Text("Memuat data..."));
-          },
+              if (state is PaperDetailLoaded) {
+                final paper = state.paper;
+
+                return SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildHeader(),
+                      const SizedBox(height: 24),
+                      _buildPaperInfo(
+                        title: paper.title,
+                        author: paper.author,
+                        category: paper.category,
+                      ),
+                      const SizedBox(height: 20),
+                      _buildLearnMore(paper.url),
+                      const SizedBox(height: 20),
+                      _buildFeedbackSection(paper.id),
+                      const SizedBox(height: 24),
+                      _buildDivider(),
+                      const SizedBox(height: 20),
+                      _buildAbstractSection(paper.abstract),
+                      const SizedBox(height: 28),
+                      _buildDivider(),
+                      const SizedBox(height: 20),
+                      _buildRecommendationSection(),
+                      const SizedBox(height: 24),
+                    ],
+                  ),
+                );
+              }
+
+              return const Center(child: Text("Memuat data..."));
+            },
+          ),
         ),
       ),
     );
@@ -214,7 +289,7 @@ class DetailPaperState extends State<DetailPaperScreen> {
               style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w500,
-                fontFamily: "Inter",
+                fontFamily: "Poppins",
                 color: _primaryBlue,
               ),
             ),
@@ -260,7 +335,19 @@ class DetailPaperState extends State<DetailPaperScreen> {
               alignment: Alignment.centerLeft,
               child: IconButton(
                 icon: const Icon(Icons.arrow_back, color: Colors.white),
-                onPressed: () => Navigator.pop(context),
+                onPressed: () {
+                  if (widget.originId != null && widget.originId != widget.id) {
+                    // If this paper was opened from a recommendation, go back to origin
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(
+                        builder: (_) => DetailPaperScreen(id: widget.originId!),
+                      ),
+                    );
+                  } else {
+                    // Otherwise, normal back navigation
+                    Navigator.pop(context);
+                  }
+                },
               ),
             ),
             const Text(
@@ -362,6 +449,179 @@ class DetailPaperState extends State<DetailPaperScreen> {
     );
   }
 
+  Widget _buildFeedbackSection(int paperId) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: BlocBuilder<FeedbackPaperBloc, StateFeedbackPaperBloc>(
+        builder: (context, feedbackState) {
+          final feedbackValue =
+              context.read<FeedbackPaperBloc>().feedbackMap[paperId];
+          final isLiked = feedbackValue == 1;
+          final isDisliked = feedbackValue == 0;
+
+          return Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: _primaryBlue.withValues(alpha: 0.05),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: _primaryBlue.withValues(alpha: 0.1),
+                width: 1,
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  "Was this paper helpful?",
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: _primaryBlue,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () {
+                          context.read<FeedbackPaperBloc>().add(
+                            FeedbackSubmitted(
+                              feedbackRequest: FeedbackRequest(
+                                paperId: paperId,
+                                feedbackValue: 1,
+                              ),
+                            ),
+                          );
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text("Thank you for your feedback!"),
+                              duration: Duration(seconds: 2),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          decoration: BoxDecoration(
+                            color:
+                                isLiked
+                                    ? Colors.green.withValues(alpha: 0.2)
+                                    : Colors.grey.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                              color:
+                                  isLiked
+                                      ? Colors.green
+                                      : Colors.grey.withValues(alpha: 0.3),
+                              width: 1.5,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                isLiked
+                                    ? Icons.thumb_up
+                                    : Icons.thumb_up_outlined,
+                                size: 20,
+                                color:
+                                    isLiked
+                                        ? Colors.green
+                                        : Colors.grey.shade600,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                "Like",
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color:
+                                      isLiked
+                                          ? Colors.green
+                                          : Colors.grey.shade600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () {
+                          context.read<FeedbackPaperBloc>().add(
+                            FeedbackSubmitted(
+                              feedbackRequest: FeedbackRequest(
+                                paperId: paperId,
+                                feedbackValue: 0,
+                              ),
+                            ),
+                          );
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text("Thank you for your feedback!"),
+                              duration: Duration(seconds: 2),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          decoration: BoxDecoration(
+                            color:
+                                isDisliked
+                                    ? Colors.red.withValues(alpha: 0.2)
+                                    : Colors.grey.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                              color:
+                                  isDisliked
+                                      ? Colors.red
+                                      : Colors.grey.withValues(alpha: 0.3),
+                              width: 1.5,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                isDisliked
+                                    ? Icons.thumb_down
+                                    : Icons.thumb_down_outlined,
+                                size: 20,
+                                color:
+                                    isDisliked
+                                        ? Colors.red
+                                        : Colors.grey.shade600,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                "Dislike",
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color:
+                                      isDisliked
+                                          ? Colors.red
+                                          : Colors.grey.shade600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
   Widget _buildDivider() {
     return const Padding(
       padding: EdgeInsets.symmetric(horizontal: 16),
@@ -411,7 +671,7 @@ class DetailPaperState extends State<DetailPaperScreen> {
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
-                  fontFamily: "Inter",
+                  fontFamily: "Poppins",
                   color: _primaryBlue,
                 ),
               ),
@@ -550,11 +810,12 @@ class DetailPaperState extends State<DetailPaperScreen> {
                   );
                 }
                 return SizedBox(
-                  height: 210,
+                  height: 230,
                   child: ListView.builder(
                     scrollDirection: Axis.horizontal,
                     addRepaintBoundaries: true,
                     itemCount: recommState.papers.length,
+                    padding: const EdgeInsets.only(bottom: 10),
                     itemBuilder: (context, index) {
                       final recommendation = recommState.papers[index];
                       return _RecommendationCard(
@@ -566,8 +827,10 @@ class DetailPaperState extends State<DetailPaperScreen> {
                             context,
                             MaterialPageRoute(
                               builder:
-                                  (_) =>
-                                      DetailPaperScreen(id: recommendation.id),
+                                  (_) => DetailPaperScreen(
+                                    id: recommendation.id,
+                                    originId: widget.id,
+                                  ),
                             ),
                           );
                         },
@@ -579,6 +842,7 @@ class DetailPaperState extends State<DetailPaperScreen> {
               return const SizedBox.shrink();
             },
           ),
+          const SizedBox(height: 20),
         ],
       ),
     );
@@ -643,84 +907,75 @@ class _RecommendationCard extends StatelessWidget {
                     height: 1.3,
                   ),
                 ),
-                const SizedBox(height: 6),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 6,
-                        vertical: 3,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.blue.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(5),
-                      ),
-                      child: Text(
-                        ucbScore.toStringAsFixed(2).replaceAll('.', ','),
-                        style: const TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.blue,
-                        ),
-                      ),
-                    ),
-                    BlocBuilder<FeedbackPaperBloc, StateFeedbackPaperBloc>(
-                      builder: (context, feedbackState) {
-                        final feedbackValue =
-                            context
-                                .read<FeedbackPaperBloc>()
-                                .feedbackMap[paperId];
-                        final isLiked = feedbackValue == 1;
-                        final isDisliked = feedbackValue == 0;
+                const SizedBox(height: 12),
+                BlocBuilder<FeedbackPaperBloc, StateFeedbackPaperBloc>(
+                  builder: (context, feedbackState) {
+                    final feedbackValue =
+                        context.read<FeedbackPaperBloc>().feedbackMap[paperId];
+                    final isLiked = feedbackValue == 1;
+                    final isDisliked = feedbackValue == 0;
 
-                        return Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            GestureDetector(
-                              onTap: () {
-                                context.read<FeedbackPaperBloc>().add(
-                                  FeedbackSubmitted(
-                                    feedbackRequest: FeedbackRequest(
-                                      paperId: paperId,
-                                      feedbackValue: 1,
-                                    ),
-                                  ),
-                                );
-                              },
-                              child: Icon(
-                                isLiked
-                                    ? Icons.thumb_up
-                                    : Icons.thumb_up_outlined,
-                                size: 14,
-                                color: isLiked ? Colors.blue : Colors.grey,
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            context.read<FeedbackPaperBloc>().add(
+                              FeedbackSubmitted(
+                                feedbackRequest: FeedbackRequest(
+                                  paperId: paperId,
+                                  feedbackValue: 1,
+                                ),
                               ),
+                            );
+                          },
+                          child: Icon(
+                            isLiked ? Icons.thumb_up : Icons.thumb_up_outlined,
+                            size: 20,
+                            color: isLiked ? Colors.blue : Colors.grey.shade600,
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 5,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.blue.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            ucbScore.toStringAsFixed(2).replaceAll('.', ','),
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.blue,
                             ),
-                            const SizedBox(width: 8),
-                            GestureDetector(
-                              onTap: () {
-                                context.read<FeedbackPaperBloc>().add(
-                                  FeedbackSubmitted(
-                                    feedbackRequest: FeedbackRequest(
-                                      paperId: paperId,
-                                      feedbackValue: 0,
-                                    ),
-                                  ),
-                                );
-                              },
-                              child: Icon(
-                                isDisliked
-                                    ? Icons.thumb_down
-                                    : Icons.thumb_down_outlined,
-                                size: 14,
-                                color: isDisliked ? Colors.red : Colors.grey,
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            context.read<FeedbackPaperBloc>().add(
+                              FeedbackSubmitted(
+                                feedbackRequest: FeedbackRequest(
+                                  paperId: paperId,
+                                  feedbackValue: 0,
+                                ),
                               ),
-                            ),
-                          ],
-                        );
-                      },
-                    ),
-                  ],
+                            );
+                          },
+                          child: Icon(
+                            isDisliked
+                                ? Icons.thumb_down
+                                : Icons.thumb_down_outlined,
+                            size: 20,
+                            color:
+                                isDisliked ? Colors.red : Colors.grey.shade600,
+                          ),
+                        ),
+                      ],
+                    );
+                  },
                 ),
               ],
             ),
