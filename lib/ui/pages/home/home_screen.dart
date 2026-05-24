@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:arxivinder/blocs/papers/paper_bloc.dart';
 import 'package:arxivinder/blocs/papers/paper_event_bloc.dart';
 import 'package:arxivinder/blocs/papers/paper_state_bloc.dart';
@@ -23,15 +25,28 @@ class HomeState extends State<HomeScreen> {
   String? _selectedSort;
   DateTime? _startDate;
   DateTime? _endDate;
+  late TextEditingController _searchController;
+  Timer? _searchDebounce;
 
   @override
   void initState() {
     super.initState();
     _userFuture = SecureStorageService.getUserData();
     _isLoggedIn = SecureStorageService.isLoggedIn();
+    _searchController = TextEditingController();
+    _searchController.addListener(() {
+      setState(() {});
+    });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<PaperBloc>().add(const GetAllPapers());
     });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _searchDebounce?.cancel();
+    super.dispose();
   }
 
   Future<void> _selectDateRange() async {
@@ -39,9 +54,10 @@ class HomeState extends State<HomeScreen> {
       context: context,
       firstDate: DateTime(2020),
       lastDate: DateTime.now(),
-      initialDateRange: _startDate != null && _endDate != null
-          ? DateTimeRange(start: _startDate!, end: _endDate!)
-          : null,
+      initialDateRange:
+          _startDate != null && _endDate != null
+              ? DateTimeRange(start: _startDate!, end: _endDate!)
+              : null,
     );
 
     if (picked != null) {
@@ -53,10 +69,7 @@ class HomeState extends State<HomeScreen> {
 
       if (mounted) {
         context.read<PaperBloc>().add(
-          GetPapersByDateRange(
-            startDate: picked.start,
-            endDate: picked.end,
-          ),
+          GetPapersByDateRange(startDate: picked.start, endDate: picked.end),
         );
       }
     }
@@ -69,9 +82,7 @@ class HomeState extends State<HomeScreen> {
       _endDate = null;
     });
 
-    context.read<PaperBloc>().add(
-      GetPapersSortedBy(sort: sort, limit: 50),
-    );
+    context.read<PaperBloc>().add(GetPapersSortedBy(sort: sort, limit: 50));
   }
 
   void _clearFilters() {
@@ -79,9 +90,34 @@ class HomeState extends State<HomeScreen> {
       _selectedSort = null;
       _startDate = null;
       _endDate = null;
+      _searchController.clear();
     });
 
     context.read<PaperBloc>().add(const GetAllPapers());
+  }
+
+  void _onSearchChanged(String query) async {
+    _searchDebounce?.cancel();
+
+    if (query.isEmpty) {
+      context.read<PaperBloc>().add(const GetAllPapers());
+      return;
+    }
+
+    final isLoggedIn = await SecureStorageService.isLoggedIn();
+    if (!isLoggedIn && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Anda harus login terlebih dahulu untuk melakukan pencarian'),
+        ),
+      );
+      _searchController.clear();
+      return;
+    }
+
+    _searchDebounce = Timer(const Duration(milliseconds: 500), () {
+      context.read<PaperBloc>().add(SearchPaperByName(name: query));
+    });
   }
 
   @override
@@ -160,7 +196,7 @@ class HomeState extends State<HomeScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
-                  "Halo, Selamat Datang",
+                  "Hello, Welcome",
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 28,
@@ -206,7 +242,7 @@ class HomeState extends State<HomeScreen> {
           ),
           Padding(
             padding: const EdgeInsets.only(
-              top: 130,
+              top: 100,
               left: 16,
               right: 16,
               bottom: 20,
@@ -222,6 +258,7 @@ class HomeState extends State<HomeScreen> {
                 ),
                 boxShadow: [
                   BoxShadow(
+                    // ignore: deprecated_member_use
                     color: Colors.black.withOpacity(0.05),
                     blurRadius: 10,
                     offset: const Offset(0, 5),
@@ -232,53 +269,122 @@ class HomeState extends State<HomeScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Padding(
-                    padding: const EdgeInsets.fromLTRB(18, 20, 18, 12),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    padding: const EdgeInsets.fromLTRB(18, 18, 18, 14),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          "Karya Ilmiah Untuk Anda",
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            fontFamily: 'Poppins',
-                            color: Color(0xFF3674B5),
-                          ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              "Scientific Papers For You",
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'Poppins',
+                                color: Color(0xFF3674B5),
+                              ),
+                            ),
+                            if (_selectedSort != null ||
+                                _startDate != null ||
+                                _searchController.text.isNotEmpty)
+                              GestureDetector(
+                                onTap: _clearFilters,
+                                child: const Icon(
+                                  Icons.clear,
+                                  size: 20,
+                                  color: Color(0xFF3674B5),
+                                ),
+                              ),
+                          ],
                         ),
-                        if (_selectedSort != null || _startDate != null)
-                          GestureDetector(
-                            onTap: _clearFilters,
-                            child: const Icon(
-                              Icons.clear,
-                              size: 20,
+                        const SizedBox(height: 12),
+                        TextField(
+                          controller: _searchController,
+                          onChanged: _onSearchChanged,
+                          decoration: InputDecoration(
+                            hintText: 'Search papers...',
+                            hintStyle: TextStyle(
+                              color: Colors.grey.shade400,
+                              fontSize: 14,
+                            ),
+                            prefixIcon: const Icon(
+                              Icons.search,
                               color: Color(0xFF3674B5),
+                              size: 20,
+                            ),
+                            suffixIcon:
+                                _searchController.text.isNotEmpty
+                                    ? GestureDetector(
+                                      onTap: () {
+                                        _searchController.clear();
+                                        _onSearchChanged('');
+                                      },
+                                      child: const Icon(
+                                        Icons.close,
+                                        color: Color(0xFF3674B5),
+                                        size: 18,
+                                      ),
+                                    )
+                                    : null,
+                            filled: true,
+                            fillColor: Colors.grey.shade50,
+                            contentPadding: const EdgeInsets.symmetric(
+                              vertical: 12,
+                              horizontal: 12,
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: BorderSide(
+                                color: Colors.grey.shade300,
+                                width: 1,
+                              ),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: BorderSide(
+                                color: Colors.grey.shade300,
+                                width: 1,
+                              ),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: const BorderSide(
+                                color: Color(0xFF3674B5),
+                                width: 2,
+                              ),
                             ),
                           ),
+                        ),
                       ],
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 10,
+                    ),
                     child: SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
                       child: Row(
                         children: [
                           _FilterButton(
-                            label: 'Terbaru',
+                            label: 'Newest',
                             isActive: _selectedSort == 'newest',
                             onTap: () => _applySortFilter('newest'),
                           ),
                           const SizedBox(width: 8),
                           _FilterButton(
-                            label: 'Terlama',
+                            label: 'Oldest',
                             isActive: _selectedSort == 'oldest',
                             onTap: () => _applySortFilter('oldest'),
                           ),
                           const SizedBox(width: 8),
                           _FilterButton(
-                            label: _startDate != null && _endDate != null
-                                ? '📅 ${_startDate!.day}/${_startDate!.month} - ${_endDate!.day}/${_endDate!.month}'
-                                : 'Rentang Tanggal',
+                            label:
+                                _startDate != null && _endDate != null
+                                    ? '📅 ${_startDate!.day}/${_startDate!.month} - ${_endDate!.day}/${_endDate!.month}'
+                                    : 'Date Range',
                             isActive: _startDate != null,
                             onTap: _selectDateRange,
                           ),
@@ -286,7 +392,6 @@ class HomeState extends State<HomeScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 12),
                   Expanded(
                     child: FutureBuilder<bool>(
                       future: _isLoggedIn,
@@ -309,7 +414,7 @@ class HomeState extends State<HomeScreen> {
                               final papers = state.papers;
                               if (papers.isEmpty) {
                                 return const Center(
-                                  child: Text('Tidak ada paper tersedia'),
+                                  child: Text('No papers available'),
                                 );
                               }
                               return ListView.separated(
@@ -318,8 +423,8 @@ class HomeState extends State<HomeScreen> {
                                   vertical: 8,
                                 ),
                                 itemCount: papers.length,
-                                separatorBuilder: (_, __) =>
-                                    const SizedBox(height: 10),
+                                separatorBuilder:
+                                    (_, __) => const SizedBox(height: 10),
                                 itemBuilder: (ctx, index) {
                                   final item = papers[index];
                                   return RepaintBoundary(
@@ -332,10 +437,91 @@ class HomeState extends State<HomeScreen> {
                               );
                             } else if (state is FetchFailure) {
                               return Center(
-                                child: Text('Error: ${state.error}'),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(24),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    children: [
+                                      const Icon(
+                                        Icons.error_outline,
+                                        size: 48,
+                                        color: Color(0xFF3674B5),
+                                      ),
+                                      const SizedBox(height: 16),
+                                      Text(
+                                        'Oops, Terjadi Kesalahan',
+                                        style: const TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                          color: Color(0xFF3674B5),
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                      const SizedBox(height: 12),
+                                      Text(
+                                        state.friendlyMessage ??
+                                            'Terjadi kesalahan saat mengambil data. Silakan coba lagi.',
+                                        style: const TextStyle(
+                                          fontSize: 14,
+                                          color: Colors.black87,
+                                          height: 1.5,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                      const SizedBox(height: 24),
+                                      ElevatedButton.icon(
+                                        onPressed: () {
+                                          if (_selectedSort != null) {
+                                            context.read<PaperBloc>().add(
+                                              GetPapersSortedBy(
+                                                sort: _selectedSort!,
+                                                limit: 50,
+                                              ),
+                                            );
+                                          } else if (_startDate != null &&
+                                              _endDate != null) {
+                                            context.read<PaperBloc>().add(
+                                              GetPapersByDateRange(
+                                                startDate: _startDate!,
+                                                endDate: _endDate!,
+                                              ),
+                                            );
+                                          } else if (_searchController
+                                              .text.isNotEmpty) {
+                                            context.read<PaperBloc>().add(
+                                              SearchPaperByName(
+                                                name: _searchController.text,
+                                              ),
+                                            );
+                                          } else {
+                                            context.read<PaperBloc>().add(
+                                              const GetAllPapers(),
+                                            );
+                                          }
+                                        },
+                                        icon: const Icon(Icons.refresh),
+                                        label: const Text('Coba Lagi'),
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor:
+                                              const Color(0xFF3674B5),
+                                          foregroundColor: Colors.white,
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 32,
+                                            vertical: 12,
+                                          ),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(8),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
                               );
                             }
-                            return const Center(child: Text('Tidak ada data'));
+                            return const Center(child: Text('No data'));
                           },
                         );
                       },
@@ -372,9 +558,7 @@ class _FilterButton extends StatelessWidget {
           color: isActive ? const Color(0xFF3674B5) : Colors.grey.shade100,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isActive
-                ? const Color(0xFF3674B5)
-                : Colors.grey.shade300,
+            color: isActive ? const Color(0xFF3674B5) : Colors.grey.shade300,
             width: 1,
           ),
         ),
@@ -395,10 +579,7 @@ class _PaperTile extends StatelessWidget {
   final dynamic item;
   final bool isLoggedIn;
 
-  const _PaperTile({
-    required this.item,
-    required this.isLoggedIn,
-  });
+  const _PaperTile({required this.item, required this.isLoggedIn});
 
   @override
   Widget build(BuildContext context) {
@@ -416,9 +597,7 @@ class _PaperTile extends StatelessWidget {
         } else {
           Navigator.push(
             context,
-            MaterialPageRoute(
-              builder: (context) => const LoginPageScreen(),
-            ),
+            MaterialPageRoute(builder: (context) => const LoginPageScreen()),
           );
         }
       },
