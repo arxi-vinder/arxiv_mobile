@@ -128,7 +128,7 @@ class LoginPageState extends State<LoginPageScreen> {
                         child: Text(
                           "Sign Up",
                           style: TextStyle(
-                            fontFamily: "Roboto",
+                            fontFamily: "Poppins",
                             fontSize: 12,
                             color: Colors.blue,
                             fontWeight: FontWeight.w600,

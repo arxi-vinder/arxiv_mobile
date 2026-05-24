@@ -78,7 +78,7 @@ class RegisterPageState extends State<RegisterPageScreen> {
                           fontWeight: FontWeight.w700,
                           height: 1.1,
                           letterSpacing: -0.5,
-                          fontFamily: 'Roboto',
+                          fontFamily: 'Poppins',
                         ),
                       ),
                       const SizedBox(height: 30),
@@ -207,13 +207,24 @@ class RegisterPageState extends State<RegisterPageScreen> {
                                       ),
                                     ),
                                     const SizedBox(width: 4),
-                                    const Text(
-                                      "Login",
-                                      style: TextStyle(
-                                        fontFamily: "Roboto",
-                                        fontSize: 12,
-                                        color: Colors.blue,
-                                        fontWeight: FontWeight.w600,
+                                    GestureDetector(
+                                      onTap: () {
+                                        Navigator.pushReplacement(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                const LoginPageScreen(),
+                                          ),
+                                        );
+                                      },
+                                      child: const Text(
+                                        "Login",
+                                        style: TextStyle(
+                                          fontFamily: "Poppins",
+                                          fontSize: 12,
+                                          color: Colors.blue,
+                                          fontWeight: FontWeight.w600,
+                                        ),
                                       ),
                                     ),
                                   ],

@@ -59,7 +59,7 @@ class CustomAuthWidget extends StatelessWidget {
                         fontWeight: FontWeight.w700,
                         height: 1.1,
                         letterSpacing: -0.5,
-                        fontFamily: 'Roboto',
+                        fontFamily: 'Poppins',
                       ),
                     ),
 
