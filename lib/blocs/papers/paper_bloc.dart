@@ -1,6 +1,7 @@
 import 'package:arxivinder/blocs/papers/paper_event_bloc.dart';
 import 'package:arxivinder/blocs/papers/paper_state_bloc.dart';
 import 'package:arxivinder/data/services/papers_api.dart';
+import 'package:arxivinder/utils/error_handler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class PaperBloc extends Bloc<PaperEventBloc, PaperStateBloc> {
@@ -10,6 +11,7 @@ class PaperBloc extends Bloc<PaperEventBloc, PaperStateBloc> {
     on<GetAllPapers>(_getPaperFetched);
     on<GetPapersSortedBy>(_getPapersSortedBy);
     on<GetPapersByDateRange>(_getPapersByDateRange);
+    on<SearchPaperByName>(_searchPaperByName);
   }
 
   Future<void> _getPaperFetched(
@@ -22,7 +24,8 @@ class PaperBloc extends Bloc<PaperEventBloc, PaperStateBloc> {
       final papers = await api.getPapers();
       emit(FetchSuccess(papers));
     } catch (e) {
-      emit(FetchFailure(e.toString()));
+      emit(FetchFailure(e.toString(),
+          friendlyMessage: ErrorHandler.getErrorMessage(e)));
     }
   }
 
@@ -42,7 +45,8 @@ class PaperBloc extends Bloc<PaperEventBloc, PaperStateBloc> {
         sortBy: event.sort,
       ));
     } catch (e) {
-      emit(FetchFailure(e.toString()));
+      emit(FetchFailure(e.toString(),
+          friendlyMessage: ErrorHandler.getErrorMessage(e)));
     }
   }
 
@@ -66,7 +70,23 @@ class PaperBloc extends Bloc<PaperEventBloc, PaperStateBloc> {
         endDate: event.endDate,
       ));
     } catch (e) {
-      emit(FetchFailure(e.toString()));
+      emit(FetchFailure(e.toString(),
+          friendlyMessage: ErrorHandler.getErrorMessage(e)));
+    }
+  }
+
+  Future<void> _searchPaperByName(
+    SearchPaperByName event,
+    Emitter<PaperStateBloc> emit,
+  ) async {
+    emit(FetchLoading());
+
+    try {
+      final papers = await api.searchPaperByName(event.name);
+      emit(FetchSuccess(papers));
+    } catch (e) {
+      emit(FetchFailure(e.toString(),
+          friendlyMessage: ErrorHandler.getErrorMessage(e)));
     }
   }
 }

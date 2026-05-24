@@ -39,7 +39,8 @@ class _RecommenderScreenState extends State<RecommenderScreen> {
           }
 
           if (state is CategoryError) {
-            return _buildErrorState(state.message);
+            return _buildErrorState(state.message,
+                friendlyMessage: state.friendlyMessage);
           }
 
           if (state is CategoryLoaded) {
@@ -86,24 +87,53 @@ class _RecommenderScreenState extends State<RecommenderScreen> {
     return const Center(child: CircularProgressIndicator(color: _primaryBlue));
   }
 
-  Widget _buildErrorState(String message) {
+  Widget _buildErrorState(String message, {String? friendlyMessage}) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const Icon(Icons.error_outline, size: 64, color: Colors.red),
+            const Icon(Icons.error_outline, size: 48, color: _primaryBlue),
             const SizedBox(height: 16),
-            Text(
-              "Error",
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              message,
+            const Text(
+              'Oops, Terjadi Kesalahan',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: _primaryBlue,
+              ),
               textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 14, color: Colors.black54),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              friendlyMessage ?? 'Terjadi kesalahan saat mengambil data kategori.',
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 14,
+                color: Colors.black87,
+                height: 1.5,
+              ),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton.icon(
+              onPressed: () {
+                context.read<CategoryBloc>().add(const FetchCategories());
+              },
+              icon: const Icon(Icons.refresh),
+              label: const Text('Coba Lagi'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: _primaryBlue,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 32,
+                  vertical: 12,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
             ),
           ],
         ),
